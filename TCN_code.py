@@ -61,9 +61,10 @@ def TCN(input_dim,time_steps,layers,features,dilation_rate=2.,kernel_size=3, dro
         else:
             in_channels = num_channels[i-1]
             mod = ResidualBlock(mod,out_channels,kernel_size,dilation_size,dropout)
-    cEnd = Conv1D(1,kernel_size=1,dilation_rate=1,activation='relu',\
+    cEnd = Conv1D(1,kernel_size=1,dilation_rate=1,activation='sigmoid',\
                padding='same',kernel_initializer=RandomNormal(mean=0,stddev=0.01))(mod)
-    mod1 = Flatten()(cEnd)
+    bcEnd = BatchNormalization()(cEnd)
+    mod1 = Flatten()(bcEnd)
     mod2 = Dense(1,activation='linear',kernel_initializer=RandomNormal(mean=0,stddev=0.01),bias_initializer=keras.initializers.Constant(value=14.))(mod1) # the last output should be able to reach all of y values
     model = Model(input=[inputs], output=mod2)
     return model
