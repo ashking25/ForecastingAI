@@ -92,33 +92,3 @@ def dataloader(batch_size=10,nstart=0,num_eq=1000,num_days=30,PATH='/Users/ashki
             yield (data,y)
 
 
-if 1 == 2:
-    LAYERS    = 12
-    N_HIDDEN  = 1024 # hidden layer, i.e. num of features
-    INPUT_DIM = 24*3600 # seconds in a day, number of channels -1
-    TIME_STEPS    = 1
-    KERNEL_SIZE   = 12
-    layers_effect = 1+2*(KERNEL_SIZE-1)*(2**LAYERS-1)
-    BATCH_SIZE    = 10
-    EPOCHS        = 2
-    STEPS_PER_EPOCH = int(1000*30/BATCH_SIZE)
-
-    train_gen = dataloader(batch_size=BATCH_SIZE)
-    test_gen  = dataloader(batch_size=BATCH_SIZE) # its not clear to me this will
-                        #give seperate test data, so be careful in interpretations
-
-    #print 'the number of effected points',layers_effect
-
-    model = TCN(INPUT_DIM,TIME_STEPS,LAYERS,N_HIDDEN,kernel_size=KERNEL_SIZE,dropout=0.)
-    adam = keras.optimizers.Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=None,
-        decay=0.01, amsgrad=False)
-
-    #Compile model
-    model.compile(loss='mean_squared_error',  metrics=['accuracy'],optimizer=adam)
-    #print model.summary()
-    # Record whats going on using TensorBoard
-    #tensorboard = TensorBoard(log_dir="logs/{}".format(time()),histogram_freq=1,write_images=True)
-
-    # Fit using Fit_generator
-    #model.fit_generator(train_gen,steps_per_epoch=STEPS_PER_EPOCH,epochs=EPOCHS,verbose=1,\
-    #    validation_data=test_gen,validation_steps=5,callbacks=[tensorboard])
