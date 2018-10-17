@@ -6,7 +6,7 @@ import keras
 from keras.models import Sequential
 from keras.layers import Dense, TimeDistributed, Conv1D, MaxPooling1D
 from keras.layers import LSTM, Reshape, Flatten, Input
-from keras.layers import Add, Dropout, BatchNormalization
+from keras.layers import Add, Dropout, BatchNormalization, Concatenate
 from keras.models import *
 from keras.callbacks import TensorBoard
 from keras.initializers import RandomNormal
@@ -108,7 +108,9 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     lstm2=LSTM(features, activation='linear')(mod2)
     #mod1 = Flatten()(cEnd)
     #mod2 = Dense(1, activation='linear', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(lstm2) # the last output should be able to reach all of y values
-    model = Model(input=[inputs], output=[lstm2,mod2])
+    resh2 = Flatten()(mod2)
+    mod_end = Concatenate()([lstm2,resh2])
+    model = Model(input=[inputs], output=mod_end)
     return model
 
 ### Data params ###
