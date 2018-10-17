@@ -127,12 +127,12 @@ dilation_rate = 2
 layers = int(np.ceil(np.log((input_dim[1]-1.)/(2.*(kernel_size-1))+1)/np.log(dilation_rate)))
 
 ### Data ###
-#train_gen = dataloader_2(timesteps, data_length, lookback=lookback, batch_size=batch_size,
-#    num_eq=900, PATH='../data/mocks')
-#test_gen  = dataloader_2(timesteps, data_length, lookback=lookback, batch_size=25,
-#    nstart=901, num_eq=1000, PATH='/home/ashking/quake_finder/data/mocks') #
-#test_data = next(test_gen)
-#train_data = next(train_gen)
+train_gen = dataloader_2(timesteps, data_length, lookback=lookback, batch_size=batch_size,
+    num_eq=900, PATH='../data/mocks')
+test_gen  = dataloader_2(timesteps, data_length, lookback=lookback, batch_size=25,
+    nstart=901, num_eq=1000, PATH='/home/ashking/quake_finder/data/mocks') #
+test_data = next(test_gen)
+train_data = next(train_gen)
 
 
 ### Model ###
@@ -147,15 +147,15 @@ model2.compile(loss='mean_squared_error',  metrics=['accuracy'], optimizer=adam)
 print(model2.summary())
 print('layers', layers)
 
-#tensorboard = TensorBoard(log_dir="../data/mocks/logs/hybrid_l"+str(layers)+\
-#    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+str(features)+"_sqerr", \
-#    histogram_freq=0, write_images=True)
+tensorboard = TensorBoard(log_dir="../data/mocks/logs/hybrid_l"+str(layers)+\
+    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+str(features)+"_sqerr", \
+    histogram_freq=0, write_images=True)
 
-#filepath = "../data/mocks/logs/model_hybrid_l"+str(layers)+\
-#    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+str(features)+"_sqerr.hdf5"
+filepath = "../data/mocks/logs/model_hybrid_l"+str(layers)+\
+    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+str(features)+"_sqerr.hdf5"
 
-#callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
-#    verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
+callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
+    verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
-#model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs, verbose=2, \
-#        validation_data=test_data, callbacks=[tensorboard, callbacks])
+model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs, verbose=2, \
+        validation_data=test_data, callbacks=[tensorboard, callbacks])
