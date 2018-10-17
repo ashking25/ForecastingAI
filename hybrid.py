@@ -94,8 +94,9 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
 
     cEnd = TimeDistributed(Conv1D(1, kernel_size=1, dilation_rate=1, activation='sigmoid', \
                padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(mod)
+    bEnd = TimeDistributed(BatchNormalization())(cEnd)
     resh = Reshape((timesteps*lookback, data_length), \
-        input_shape=(timesteps*lookback, data_length, 1))(cEnd)
+        input_shape=(timesteps*lookback, data_length, 1))(bEnd)
     mod2 = TimeDistributed(Dense(1, activation='linear', \
         kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(resh) # the last output should be able to reach all of y values
 
@@ -136,8 +137,8 @@ model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
         dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
 
 #Optimizer
-adam = keras.optimizers.Adam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None,
-    decay=0.01, amsgrad=False)
+adam = keras.optimizers.Adam(lr=0.02, beta_1=0.9, beta_2=0.999, epsilon=None,
+    decay=0.00, amsgrad=False)
 model2.compile(loss='mean_squared_error',  metrics=['accuracy'], optimizer=adam)
 
 print(model2.summary())
@@ -150,7 +151,8 @@ tensorboard = TensorBoard(log_dir="../data/mocks/logs/hybrid_l"+str(layers)+\
 filepath = "../data/mocks/logs/model_hybrid_l"+str(layers)+\
     "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+str(features)+"_sqerr.hdf5"
 
-callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
+callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
+    verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
 model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs, verbose=2, \
         validation_data=test_data, callbacks=[tensorboard, callbacks])
