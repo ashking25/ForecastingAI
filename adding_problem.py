@@ -1,9 +1,6 @@
 # Adding problem
 from time import time
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib
 import keras
 from keras.models import Sequential
 from keras.layers import Dense,TimeDistributed,RepeatVector,merge,Conv1D,MaxPooling1D
@@ -14,6 +11,9 @@ from sklearn.preprocessing import MinMaxScaler
 from keras.callbacks import TensorBoard
 from keras.utils.np_utils import to_categorical
 from TCN_code import ResidualBlock,TCN
+
+# problem is and setup is taken from
+#https://github.com/locuslab/TCN/tree/master/TCN/adding_problem
 
 # Problem size
 T = 600
