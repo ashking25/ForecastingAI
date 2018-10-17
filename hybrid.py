@@ -31,14 +31,17 @@ def dataloader_2(timesteps, feature_length, lookback=3, batch_size=10, nstart=0,
 
             for j, (EQ, day) in enumerate(zip(number_EQ[start:int(start+batch_size)], number_days[start:int(start+batch_size)])):
                 newdata = ()
+                ynew = [day]
                 for s in range(lookback):
                     dataset0 = np.load(PATH+'/EQ'+str(EQ)+'_'+str(day+lookback-1-s)+'daysuntilEQ.npy')
                     if np.size(newdata) <= 0:
                         newdata = reshapedata(dataset0, timesteps, feature_length)
                     else:
                         newdata = np.append(newdata, reshapedata(dataset0, timesteps, feature_length), axis=1)
+                    ynew.append(day+lookback-1-s)
+
                 data += [newdata]
-                y    += [day]
+                y    += [ynew]
 
             # This isn't normalized! We should think about this
             data = np.reshape(data, (len(data), int(timesteps*lookback), int(feature_length), 1))
@@ -105,7 +108,7 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     lstm2=LSTM(features, activation='linear')(mod2)
     #mod1 = Flatten()(cEnd)
     #mod2 = Dense(1, activation='linear', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(lstm2) # the last output should be able to reach all of y values
-    model = Model(input=[inputs], output=lstm2)
+    model = Model(input=[inputs], output=[lstm2,mod2])
     return model
 
 ### Data params ###
@@ -124,12 +127,12 @@ dilation_rate = 2
 layers = int(np.ceil(np.log((input_dim[1]-1.)/(2.*(kernel_size-1))+1)/np.log(dilation_rate)))
 
 ### Data ###
-train_gen = dataloader_2(timesteps, data_length, lookback=lookback, batch_size=batch_size,
-    num_eq=900, PATH='../data/mocks')
-test_gen  = dataloader_2(timesteps, data_length, lookback=lookback, batch_size=25,
-    nstart=901, num_eq=1000, PATH='/home/ashking/quake_finder/data/mocks') #
-test_data = next(test_gen)
-train_data = next(train_gen)
+#train_gen = dataloader_2(timesteps, data_length, lookback=lookback, batch_size=batch_size,
+#    num_eq=900, PATH='../data/mocks')
+#test_gen  = dataloader_2(timesteps, data_length, lookback=lookback, batch_size=25,
+#    nstart=901, num_eq=1000, PATH='/home/ashking/quake_finder/data/mocks') #
+#test_data = next(test_gen)
+#train_data = next(train_gen)
 
 
 ### Model ###
@@ -144,15 +147,15 @@ model2.compile(loss='mean_squared_error',  metrics=['accuracy'], optimizer=adam)
 print(model2.summary())
 print('layers', layers)
 
-tensorboard = TensorBoard(log_dir="../data/mocks/logs/hybrid_l"+str(layers)+\
-    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+str(features)+"_sqerr", \
-    histogram_freq=0, write_images=True)
+#tensorboard = TensorBoard(log_dir="../data/mocks/logs/hybrid_l"+str(layers)+\
+#    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+str(features)+"_sqerr", \
+#    histogram_freq=0, write_images=True)
 
-filepath = "../data/mocks/logs/model_hybrid_l"+str(layers)+\
-    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+str(features)+"_sqerr.hdf5"
+#filepath = "../data/mocks/logs/model_hybrid_l"+str(layers)+\
+#    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+str(features)+"_sqerr.hdf5"
 
-callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
-    verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
+#callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
+#    verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
-model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs, verbose=2, \
-        validation_data=test_data, callbacks=[tensorboard, callbacks])
+#model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs, verbose=2, \
+#        validation_data=test_data, callbacks=[tensorboard, callbacks])
