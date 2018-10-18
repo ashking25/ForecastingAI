@@ -180,8 +180,8 @@ tensorboard = TensorBoard(log_dir="../data/mocks/logs/hybrid_l"+str(layers)+\
     histogram_freq=0, write_images=True)
 
 filepath = "../data/mocks/logs/model_hybrid_l"+str(layers)+\
-    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+
-    str(features)+"_lr"+str(lr)+"_sqerr.hdf5"
+    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+\
+        str(features)+"_lr"+str(lr)+"_sqerr.hdf5"
 
 callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
     verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
