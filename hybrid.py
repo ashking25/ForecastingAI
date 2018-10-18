@@ -164,10 +164,10 @@ model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
         dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
 
 #Optimizer
-adam = keras.optimizers.Adam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None,
-    decay=0.005, amsgrad=False)
-model2.compile(loss=[mean_total_squared_error, mean_tcn_squared_error],
-    metrics=[binary_lstm_accuracy, binary_tcn_accuracy,
+adam = keras.optimizers.Adam(lr=0.0005, beta_1=0.9, beta_2=0.999, epsilon=None,
+    decay=0.01, amsgrad=False)
+model2.compile(loss=mean_total_squared_error,
+    metrics=[binary_lstm_accuracy, binary_tcn_accuracy, mean_tcn_squared_error,
     'accuracy'], optimizer=adam)
 
 print(model2.summary())
