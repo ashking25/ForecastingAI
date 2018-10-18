@@ -18,8 +18,19 @@ def binary_lstm_accuracy(y_true, y_pred):
     return K.mean(K.mean(K.slice(K.equal(y_true, K.round(y_pred)),
         (0,0), (shape[0],1)), axis=-1), axis=-1)
 
+def binary_tcn_accuracy(y_true, y_pred):
+    #want the accuracy just for the lstm output
+    shape = K.shape(y_pred)
+    return K.mean(K.mean(K.slice(K.equal(y_true, K.round(y_pred)),
+        (0,shape[1]-1), (shape[0],1)), axis=-1), axis=-1)
+
 def mean_total_squared_error(y_true,y_pred):
     return K.mean(K.sum(K.square(y_pred - y_true), axis=-1),axis=-1)
+
+def mean_tcn_squared_error(y_true,y_pred):
+    shape = K.shape(y_pred)
+    return K.mean(K.sum(K.slice(K.square(y_pred - y_true),
+        (0,shape[1]-1), (shape[0],1)), axis=-1),axis=-1)
 
 
 def reshapedata(data, timesteps, featuresize):
@@ -155,7 +166,8 @@ model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
 #Optimizer
 adam = keras.optimizers.Adam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None,
     decay=0.005, amsgrad=False)
-model2.compile(loss=mean_total_squared_error,  metrics=[binary_lstm_accuracy,
+model2.compile(loss=[mean_total_squared_error, mean_tcn_squared_error],
+    metrics=[binary_lstm_accuracy, binary_tcn_accuracy,
     'accuracy'], optimizer=adam)
 
 print(model2.summary())
