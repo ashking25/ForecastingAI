@@ -141,10 +141,10 @@ epochs = 200
 steps_per_epoch = 50# int(900/BATCH_SIZE)#*30
 timesteps = 1
 data_length = int(3600*24/timesteps)
-lookback = 3
+lookback = 5
 input_dim = (int(timesteps*lookback), int(data_length), 1)
 dropout = 0
-features = 1 # number of features in lstm
+features = 5 # number of features in lstm
 n_hidden = 50 # number of featurs in TCN
 kernel_size  = 7
 dilation_rate = 2
@@ -164,7 +164,7 @@ model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
         dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
 
 #Optimizer
-adam = keras.optimizers.Adam(lr=0.0005, beta_1=0.9, beta_2=0.999, epsilon=None,
+adam = keras.optimizers.Adam(lr=0.0002, beta_1=0.9, beta_2=0.999, epsilon=None,
     decay=0.01, amsgrad=False)
 model2.compile(loss=mean_total_squared_error,
     metrics=[binary_lstm_accuracy, binary_tcn_accuracy, mean_tcn_squared_error,
