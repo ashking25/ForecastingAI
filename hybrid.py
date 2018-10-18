@@ -11,6 +11,10 @@ from keras.models import *
 from keras.callbacks import TensorBoard
 from keras.initializers import RandomNormal
 
+def mean_total_square_error(y_true,y_pred):
+    return K.mean(K.sum(K.square(y_pred - y_true), axis=-1),axis=-1)
+
+
 def reshapedata(data, timesteps, featuresize):
     """ reshape data into N x timesteps x featuresize"""
     samples = np.size(data)/timesteps/featuresize
@@ -144,7 +148,7 @@ model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
 #Optimizer
 adam = keras.optimizers.Adam(lr=0.02, beta_1=0.9, beta_2=0.999, epsilon=None,
     decay=0.00, amsgrad=False)
-model2.compile(loss='mean_squared_error',  metrics=['accuracy'], optimizer=adam)
+model2.compile(loss=mean_total_squared_error,  metrics=['accuracy'], optimizer=adam)
 
 print(model2.summary())
 print('layers', layers)
