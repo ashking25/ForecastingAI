@@ -164,7 +164,8 @@ model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
         dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
 
 #Optimizer
-adam = keras.optimizers.Adam(lr=0.0002, beta_1=0.9, beta_2=0.999, epsilon=None,
+lr = 0.0002
+adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
     decay=0.01, amsgrad=False)
 model2.compile(loss=mean_total_squared_error,
     metrics=[binary_lstm_accuracy, binary_tcn_accuracy, mean_tcn_squared_error,
@@ -174,11 +175,13 @@ print(model2.summary())
 print('layers', layers)
 
 tensorboard = TensorBoard(log_dir="../data/mocks/logs/hybrid_l"+str(layers)+\
-    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+str(features)+"_sqerr", \
+    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+
+    str(features)+"_lr"+str(lr)+"_sqerr", \
     histogram_freq=0, write_images=True)
 
 filepath = "../data/mocks/logs/model_hybrid_l"+str(layers)+\
-    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+str(features)+"_sqerr.hdf5"
+    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+
+    str(features)+"_lr"+str(lr)+"_sqerr.hdf5"
 
 callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
     verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
