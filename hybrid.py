@@ -147,7 +147,7 @@ dropout = 0
 features = 5 # number of features in lstm
 n_hidden = 50 # number of featurs in TCN
 kernel_size  = 7
-dilation_rate = 2
+dilation_rate = 4
 layers = int(np.ceil(np.log((input_dim[1]-1.)/(2.*(kernel_size-1))+1)/np.log(dilation_rate)))
 
 ### Data ###
