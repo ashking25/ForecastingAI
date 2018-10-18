@@ -10,8 +10,15 @@ from keras.layers import Add, Dropout, BatchNormalization, Concatenate
 from keras.models import *
 from keras.callbacks import TensorBoard
 from keras.initializers import RandomNormal
+from keras import backend as K
 
-def mean_total_square_error(y_true,y_pred):
+def binary_lstm_accuracy(y_true, y_pred):
+    #want the accuracy just for the lstm output
+    shape = K.shape(y_pred)
+    return K.mean(K.mean(K.slice(K.equal(y_true, K.round(y_pred)),
+        (0,0), (shape[0],1)), axis=-1), axis=-1)
+
+def mean_total_squared_error(y_true,y_pred):
     return K.mean(K.sum(K.square(y_pred - y_true), axis=-1),axis=-1)
 
 
@@ -146,9 +153,10 @@ model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
         dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
 
 #Optimizer
-adam = keras.optimizers.Adam(lr=0.005, beta_1=0.9, beta_2=0.999, epsilon=None,
+adam = keras.optimizers.Adam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None,
     decay=0.005, amsgrad=False)
-model2.compile(loss=mean_total_squared_error,  metrics=['accuracy'], optimizer=adam)
+model2.compile(loss=mean_total_squared_error,  metrics=[binary_lstm_accuracy,
+    'accuracy'], optimizer=adam)
 
 print(model2.summary())
 print('layers', layers)
