@@ -163,7 +163,7 @@ model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
         dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
 
 #Optimizer
-lr = 0.00003
+lr = 0.0003
 adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
     decay=0.0, amsgrad=False)
 model2.compile(loss=mean_total_squared_error,
