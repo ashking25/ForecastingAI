@@ -122,11 +122,11 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     bEnd = TimeDistributed(BatchNormalization())(cEnd)
     resh = Reshape((timesteps*lookback, data_length), \
         input_shape=(timesteps*lookback, data_length, 1))(bEnd)
-    mod2 = TimeDistributed(Dense(1, activation='sigmoid', \
+    mod2 = TimeDistributed(Dense(1, activation='relu', \
         kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(resh) # the last output should be able to reach all of y values
 
     #lstm1=LSTM(features , return_sequences=True, activation='tanh')(mod2)
-    lstm2=LSTM(1, activation='tanh')(mod2)
+    lstm2=LSTM(1, activation='linear')(mod2)
     #mod1 = Flatten()(cEnd)
     #mod2 = Dense(1, activation='linear', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(lstm2) # the last output should be able to reach all of y values
     resh2 = Flatten()(mod2)
