@@ -53,7 +53,7 @@ def dataloader_2(timesteps, feature_length, lookback=3, batch_size=10, nstart=0,
 
             for j, (EQ, day) in enumerate(zip(number_EQ[start:int(start+batch_size)], number_days[start:int(start+batch_size)])):
                 newdata = ()
-                ynew = [day]
+                ynew = [day/float(num_days)]
                 for s in range(lookback):
                     dataset0 = np.load(PATH+'/EQ'+str(EQ)+'_'+str(day+lookback-1-s)+'daysuntilEQ.npy')
                     if np.size(newdata) <= 0:
