@@ -66,5 +66,5 @@ if __name__ == "__main__":
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
         save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
-    model.fit_generator(train_gen, steps_per_epoch=STEPS_PER_EPOCH, epochs=EPOCHS,
+    model.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
         verbose=2, validation_data=test_data, callbacks=[tensorboard,callbacks])
