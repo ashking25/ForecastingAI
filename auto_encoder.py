@@ -1,6 +1,6 @@
 import numpy as np
 import keras
-from keras.models import Sequential
+from keras.models import Sequential, Model
 from keras.layers import Dense, Input
 
 
@@ -28,7 +28,8 @@ def auto_encoder(input_dim, features):
     inputs = Input(shape=input_dim)
     dense = Dense(features, activation='relu')(inputs)
     out = Dense(input_dim, activation='linear')(dense)
-    return out
+    model = Model(input=[inputs], output=out)
+    return model
 
 
 if __name__ == "__main__":
@@ -39,7 +40,7 @@ if __name__ == "__main__":
     epochs = 250
     steps_per_epoch = 50
 
-    train_gen = dataloader(batch_size=batch_size num_eq=900,
+    train_gen = dataloader(batch_size=batch_size, num_eq=900,
         PATH='/home/ashking/quake_finder/data/mocks')
     test_gen  = dataloader(batch_size=25, nstart=901, num_eq=1000,
         PATH='/home/ashking/quake_finder/data/mocks') #
