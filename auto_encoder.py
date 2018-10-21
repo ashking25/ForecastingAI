@@ -35,7 +35,7 @@ def auto_encoder(input_dim, features):
 if __name__ == "__main__":
     features = 500 # hidden layer, i.e. num of features
     lr = 0.002
-    input_dim = (24*3600,1) # seconds in a day, number of channels -1
+    input_dim = (24*3600) # seconds in a day, number of channels -1
     batch_size = 2
     epochs = 250
     steps_per_epoch = 50
