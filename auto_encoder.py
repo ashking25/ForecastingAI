@@ -56,7 +56,6 @@ if __name__ == "__main__":
     model.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)
 
     print(model.summary())
-    print('layers',LAYERS)
 
     tensorboard = TensorBoard(log_dir="../data/mocks/logs/auto_encoder_lr"+str(lr)+\
         "_f"+str(features)+"_sqerr", histogram_freq=10, write_images=True)
