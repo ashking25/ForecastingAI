@@ -2,7 +2,7 @@ import numpy as np
 import keras
 from keras.models import Sequential, Model
 from keras.layers import Dense, Input
-
+from keras.callbacks import TensorBoard
 
 def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH=''):
     """ Build generator to load the data in chunks """
