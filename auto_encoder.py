@@ -20,12 +20,13 @@ def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH=''):
                 number_days[start:start+batch_size])):
                 data += [np.load(PATH+'/EQ'+str(EQ)+'_'+str(day)+'daysuntilEQ.npy')]
                 y += [day]
-
+	    
+            data = np.array(data)
             yield (data, data)
 
 
 def auto_encoder(input_dim, features):
-    inputs = Input(shape=(input_dim))
+    inputs = Input(shape=(input_dim,))
     dense = Dense(features, activation='relu')(inputs)
     out = Dense(input_dim, activation='linear')(dense)
     model = Model(input=[inputs], output=out)
@@ -54,7 +55,7 @@ if __name__ == "__main__":
         decay=0.00, amsgrad=False)
 
     model.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)
-
+    print(np.shape(train_data[0]))
     print(model.summary())
 
     tensorboard = TensorBoard(log_dir="../data/mocks/logs/auto_encoder_lr"+str(lr)+\
