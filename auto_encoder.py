@@ -25,7 +25,7 @@ def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH=''):
 
 
 def auto_encoder(input_dim, features):
-    inputs = Input(shape=(None,input_dim))
+    inputs = Input(shape=(input_dim))
     dense = Dense(features, activation='relu')(inputs)
     out = Dense(input_dim, activation='linear')(dense)
     model = Model(input=[inputs], output=out)
