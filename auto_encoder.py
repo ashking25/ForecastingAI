@@ -49,13 +49,12 @@ def auto_conv_encoder(input_dim, features, kernel, pool=2):
     pool2 = MaxPooling2D((pool,1), padding='same')(conv2)
     conv3 = Conv2D(features*4, kernel, activation='relu',padding='same')(pool2)
     pool3 = MaxPooling2D((pool,1), padding='same')(conv3)
-
     conv4 = Conv2D(features*8, kernel, activation='relu', padding='same')(pool3)
     pool4 = MaxPooling2D((pool,1), padding='same')(conv4)
 
+    # decoder
     conv9 = Conv2D(features*8, kernel, activation='relu', padding='same')(pool4)
     pool9 = UpSampling2D((pool, 1))(conv9)
-
     conv10 = Conv2D(features*4, kernel, activation='relu', padding='same')(pool9)
     pool10 = UpSampling2D((pool, 1))(conv10)
     conv11 = Conv2D(features*2, kernel, activation='relu', padding='same')(pool10)
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     model2 = auto_conv_encoder(input_dim, features, kernel)
 
     adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
-        decay=0.0, amsgrad=False)
+        decay=0.01, amsgrad=False)
 
     model2.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)#, sample_weight_mode="temporal")
 
