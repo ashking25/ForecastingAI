@@ -72,11 +72,11 @@ def auto_conv_encoder(input_dim, features, kernel, pool=2):
 if __name__ == "__main__":
     kernel = (7,1)
     features = 16 # hidden layer, i.e. num of features
-    lr = 0.00003
+    lr = 0.0003
     input_dim = (24*3600,1,1) # seconds in a day, number of channels -1
     batch_size = 2
     epochs = 500
-    steps_per_epoch = 100
+    steps_per_epoch = 50
 
     train_gen = dataloader(batch_size=batch_size, num_eq=900,
         PATH='/home/ashking/quake_finder/data/mocks',conv=True)
