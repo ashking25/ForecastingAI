@@ -7,17 +7,10 @@ from keras.models import load_model
 from keras.callbacks import Callback
 from keras import backend as K
 
-
-class AdamLearningRateTracker(Callback):
-    def on_epoch_end(self, epoch, logs={}):
-        beta_1 = 0.9
-        beta_2 = 0.999
-        optimizer = self.model.optimizer
-        if optimizer.decay > 0:
-            lr = K.eval(optimizer.lr * (1. / (1. + optimizer.decay * optimizer.iterations)))
-        t = K.cast(optimizer.iterations, K.floatx()) + 1
-        lr_t = lr * (K.sqrt(1. - K.pow(beta_2, t)) /(1. - K.pow(beta_1, t)))
-        print('\nLR: {:.6f}\n'.format(lr_t))
+class showLR( Callback ) :
+    def on_epoch_begin(self, epoch, logs=None):
+        lr = float(K.get_value(self.model.optimizer.lr))
+        print " epoch={:02d}, lr={:.5f}".format( epoch, lr )
 
 def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH='', conv=False, weights=False):
     """ Build generator to load the data in chunks """
@@ -119,7 +112,7 @@ if __name__ == "__main__":
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
         save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
-    lr_tracker = AdamLearningRateTracker()
+    lr_tracker = showLR()
     # cycle through, i think starting again is good for some reason
     model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
             verbose=2, validation_data=test_data, callbacks=[callbacks,lr_tracker])
