@@ -10,7 +10,7 @@ from keras import backend as K
 class showLR( Callback ) :
     def on_epoch_begin(self, epoch, logs=None):
         lr = float(K.get_value(self.model.optimizer.lr))
-        print " epoch={:02d}, lr={:.5f}".format( epoch, lr )
+        print(" epoch={:02d}, lr={:.5f}".format( epoch, lr ))
 
 def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH='', conv=False, weights=False):
     """ Build generator to load the data in chunks """
