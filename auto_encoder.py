@@ -71,7 +71,7 @@ def auto_conv_encoder(input_dim, features, kernel, pool=2):
 
 if __name__ == "__main__":
     kernel = (7,1)
-    features = 16 # hidden layer, i.e. num of features
+    features = 8 # hidden layer, i.e. num of features
     lr = 0.0003
     input_dim = (24*3600,1,1) # seconds in a day, number of channels -1
     batch_size = 2
