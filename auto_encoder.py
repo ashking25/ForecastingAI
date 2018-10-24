@@ -4,6 +4,20 @@ from keras.models import Sequential, Model
 from keras.layers import Dense, Input, Conv2D, UpSampling2D, Flatten, MaxPooling2D
 from keras.callbacks import TensorBoard
 from keras.models import load_model
+from keras import Callback
+from keras import backend as K
+
+
+class AdamLearningRateTracker(Callback):
+    def on_epoch_end(self, logs={}):
+        beta_1 = 0.9
+        beta_2 = 0.999
+        optimizer = self.model.optimizer
+        if optimizer.decay > 0:
+            lr = K.eval(optimizer.lr * (1. / (1. + optimizer.decay * optimizer.iterations)))
+        t = K.cast(optimizer.iterations, K.floatx()) + 1
+        lr_t = lr * (K.sqrt(1. - K.pow(beta_2, t)) /(1. - K.pow(beta_1, t)))
+        print('\nLR: {:.6f}\n'.format(lr_t))
 
 def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH='', conv=False, weights=False):
     """ Build generator to load the data in chunks """
@@ -75,7 +89,7 @@ if __name__ == "__main__":
     lr = 0.0003
     input_dim = (24*3600,1,1) # seconds in a day, number of channels -1
     batch_size = 2
-    epochs = 10
+    epochs = 100
     steps_per_epoch = 50
 
     train_gen = dataloader(batch_size=batch_size, num_eq=900,
@@ -105,7 +119,7 @@ if __name__ == "__main__":
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
         save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
-    for i in range(50):
-        # cycle through, i think starting again is good for some reason
-        model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
-            verbose=2, validation_data=test_data, callbacks=[callbacks])
+    lr_tracker = AdamLearningRateTracker()
+    # cycle through, i think starting again is good for some reason
+    model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
+            verbose=2, validation_data=test_data, callbacks=[callbacks,lr_tracker])
