@@ -1,7 +1,7 @@
 import numpy as np
 import keras
-from keras.models import Sequential, Model, Conv2D, UpSampling2D, Flatten, MaxPooling2D
-from keras.layers import Dense, Input
+from keras.models import Sequential, Model
+from keras.layers import Dense, Input, Conv2D, UpSampling2D, Flatten, MaxPooling2D
 from keras.callbacks import TensorBoard
 
 def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH='', conv=False, weights=False):
