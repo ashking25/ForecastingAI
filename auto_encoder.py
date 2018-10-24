@@ -4,7 +4,7 @@ from keras.models import Sequential, Model
 from keras.layers import Dense, Input, Conv2D, UpSampling2D, Flatten, MaxPooling2D
 from keras.callbacks import TensorBoard
 from keras.models import load_model
-from keras import Callback
+from keras.callbacks import Callback
 from keras import backend as K
 
 
