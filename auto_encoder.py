@@ -9,7 +9,7 @@ from keras import backend as K
 
 
 class AdamLearningRateTracker(Callback):
-    def on_epoch_end(self, logs={}):
+    def on_epoch_end(self, epoch, logs={}):
         beta_1 = 0.9
         beta_2 = 0.999
         optimizer = self.model.optimizer
