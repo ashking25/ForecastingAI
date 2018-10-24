@@ -31,15 +31,12 @@ def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH='', conv=
 
 
             data = np.array(data)
-            ys = np.copy(data)
-            sig = 1.5
-            ys[np.where(np.abs(ys) < sig )] = 0
 
             if conv:
                 data0 = np.reshape(data,(len(data),data.shape[1],1,1))
-                yield (data0, ys)
+                yield (data0, data)
             else:
-                yield (data, ys)
+                yield (data, data)
 
 
 def auto_encoder(input_dim, features):
@@ -98,18 +95,19 @@ if __name__ == "__main__":
 
     model2 = auto_conv_encoder(input_dim, features, kernel)
 
+    model2 = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
+
     adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
         decay=0.00, amsgrad=True)
 
     model2.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)#, sample_weight_mode="temporal")
 
-    #model2 = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
     print(model2.summary())
 
     #tensorboard = TensorBoard(log_dir="../data/mocks/logs/auto_conv_encoder_lr"+str(lr)+\
     #    "_f"+str(features)+"_k"+str(kernel[0])+"_sqerr", histogram_freq=0, write_images=False)
 
-    filepath = "../data/mocks/logs/auto_conv_encoder_no_noise_lr"+str(lr)+\
+    filepath = "../data/mocks/logs/auto_conv_encoder_lr"+str(lr)+\
         "_f"+str(features)+"_k"+str(kernel[0])+"_sqerr.hdf5"
 
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
