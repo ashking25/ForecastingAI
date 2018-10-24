@@ -79,11 +79,11 @@ def auto_conv_encoder(input_dim, features, kernel, pool=2):
 if __name__ == "__main__":
     kernel = (7,1)
     features = 16 # hidden layer, i.e. num of features
-    lr = 0.0003
+    lr = 0.00003
     input_dim = (24*3600,1,1) # seconds in a day, number of channels -1
     batch_size = 2
-    epochs = 100
-    steps_per_epoch = 50
+    epochs = 500
+    steps_per_epoch = 100
 
     train_gen = dataloader(batch_size=batch_size, num_eq=900,
         PATH='/home/ashking/quake_finder/data/mocks',conv=True)
@@ -93,14 +93,14 @@ if __name__ == "__main__":
     test_data = next(test_gen)
     train_data = next(train_gen)
 
-    model2 = auto_conv_encoder(input_dim, features, kernel)
+    #model2 = auto_conv_encoder(input_dim, features, kernel)
 
-    adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
-        decay=0.00, amsgrad=True)
+    #adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
+    #    decay=0.00, amsgrad=True)
 
-    model2.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)#, sample_weight_mode="temporal")
+    #model2.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)#, sample_weight_mode="temporal")
 
-    #model2 = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
+    model2 = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
     print(model2.summary())
 
     #tensorboard = TensorBoard(log_dir="../data/mocks/logs/auto_conv_encoder_lr"+str(lr)+\
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
         save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
-    lr_tracker = showLR()
+    #lr_tracker = showLR()
     # cycle through, i think starting again is good for some reason
     model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
-            verbose=2, validation_data=test_data, callbacks=[callbacks,lr_tracker])
+            verbose=2, validation_data=test_data, callbacks=[callbacks])
