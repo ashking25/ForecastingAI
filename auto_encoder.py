@@ -75,7 +75,7 @@ if __name__ == "__main__":
     lr = 0.0003
     input_dim = (24*3600,1,1) # seconds in a day, number of channels -1
     batch_size = 2
-    epochs = 500
+    epochs = 10
     steps_per_epoch = 50
 
     train_gen = dataloader(batch_size=batch_size, num_eq=900,
@@ -105,5 +105,7 @@ if __name__ == "__main__":
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
         save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
-    model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
-        verbose=2, validation_data=test_data, callbacks=[callbacks])
+    for i in range(10):
+        # cycle through, i think starting again is good for some reason
+        model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
+            verbose=2, validation_data=test_data, callbacks=[callbacks])
