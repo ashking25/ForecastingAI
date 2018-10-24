@@ -78,7 +78,7 @@ def auto_conv_encoder(input_dim, features, kernel, pool=2):
 
 if __name__ == "__main__":
     kernel = (7,1)
-    features = 16 # hidden layer, i.e. num of features
+    features = 32 # hidden layer, i.e. num of features
     lr = 0.00003
     input_dim = (24*3600,1,1) # seconds in a day, number of channels -1
     batch_size = 2
@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     model2 = auto_conv_encoder(input_dim, features, kernel)
 
-    model2 = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
+    #model2 = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
 
     adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
         decay=0.00)
