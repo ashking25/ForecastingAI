@@ -1,10 +1,10 @@
 import numpy as np
 import keras
-from keras.models import Sequential, Model
+from keras.models import Sequential, Model, Conv2D, UpSampling2D, Flatten, MaxPooling2D
 from keras.layers import Dense, Input
 from keras.callbacks import TensorBoard
 
-def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH=''):
+def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH='', conv=False, weights=False):
     """ Build generator to load the data in chunks """
     while True:
         number_EQ = np.random.randint(nstart, num_eq, num_eq*num_days) # draw a random distribution of events
@@ -20,9 +20,15 @@ def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH=''):
                 number_days[start:start+batch_size])):
                 data += [np.load(PATH+'/EQ'+str(EQ)+'_'+str(day)+'daysuntilEQ.npy')]
                 y += [day]
-	    
+
+
             data = np.array(data)
-            yield (data, data)
+
+            if conv:
+                data0 = np.reshape(data,(len(data),data.shape[1],1,1))
+                yield (data0, data)
+            else:
+                yield (data, data)
 
 
 def auto_encoder(input_dim, features):
@@ -33,39 +39,70 @@ def auto_encoder(input_dim, features):
     return model
 
 
+def auto_conv_encoder(input_dim, features, kernel, pool=2):
+    inputs = Input(shape=input_dim)
+
+    # encoder
+    conv1 = Conv2D(features, kernel, activation='relu',padding='same')(inputs)
+    pool1 = MaxPooling2D((pool,1), padding='same')(conv1)
+    conv2 = Conv2D(features*2, kernel, activation='relu',padding='same')(pool1)
+    pool2 = MaxPooling2D((pool,1), padding='same')(conv2)
+    conv3 = Conv2D(features*4, kernel, activation='relu',padding='same')(pool2)
+    pool3 = MaxPooling2D((pool,1), padding='same')(conv3)
+
+    conv4 = Conv2D(features*8, kernel, activation='relu', padding='same')(pool3)
+    pool4 = MaxPooling2D((pool,1), padding='same')(conv4)
+
+    conv9 = Conv2D(features*8, kernel, activation='relu', padding='same')(pool4)
+    pool9 = UpSampling2D((pool, 1))(conv9)
+
+    conv10 = Conv2D(features*4, kernel, activation='relu', padding='same')(pool9)
+    pool10 = UpSampling2D((pool, 1))(conv10)
+    conv11 = Conv2D(features*2, kernel, activation='relu', padding='same')(pool10)
+    pool11 = UpSampling2D((pool, 1))(conv11)
+    conv12 = Conv2D(features, kernel, activation='relu', padding='same')(pool11)
+    pool12 = UpSampling2D((pool, 1))(conv12)
+    conv13 = Conv2D(1, kernel, activation='linear', padding='same')(pool12)
+
+    flat = Flatten()(conv13)
+    model = Model(input=[inputs], output=flat)
+
+    return model
+
 if __name__ == "__main__":
-    features = 500 # hidden layer, i.e. num of features
-    lr = 0.002
-    input_dim = (24*3600) # seconds in a day, number of channels -1
+    kernel = (7,1)
+    features = 16 # hidden layer, i.e. num of features
+    lr = 0.0003
+    input_dim = (24*3600,1,1) # seconds in a day, number of channels -1
     batch_size = 2
-    epochs = 250
-    steps_per_epoch = 50
+    epochs = 500
+    steps_per_epoch = 100
 
     train_gen = dataloader(batch_size=batch_size, num_eq=900,
-        PATH='/home/ashking/quake_finder/data/mocks')
+        PATH='/home/ashking/quake_finder/data/mocks',conv=True)
     test_gen  = dataloader(batch_size=25, nstart=901, num_eq=1000,
-        PATH='/home/ashking/quake_finder/data/mocks') #
+        PATH='/home/ashking/quake_finder/data/mocks',conv=True) #
 
     test_data = next(test_gen)
     train_data = next(train_gen)
 
-    model = auto_encoder(input_dim, features)
+    model2 = auto_conv_encoder(input_dim, features, kernel)
 
     adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
-        decay=0.00, amsgrad=False)
+        decay=0.0, amsgrad=False)
 
-    model.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)
-    print(np.shape(train_data[0]))
-    print(model.summary())
+    model2.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)#, sample_weight_mode="temporal")
 
-    tensorboard = TensorBoard(log_dir="../data/mocks/logs/auto_encoder_lr"+str(lr)+\
-        "_f"+str(features)+"_sqerr", histogram_freq=10, write_images=True)
+    print(model2.summary())
 
-    filepath = "../data/mocks/logs/auto_encoder_lr"+str(lr)+\
-        "_f"+str(features)+"_sqerr.hdf5"
+    #tensorboard = TensorBoard(log_dir="../data/mocks/logs/auto_conv_encoder_lr"+str(lr)+\
+    #    "_f"+str(features)+"_k"+str(kernel[0])+"_sqerr", histogram_freq=0, write_images=False)
+
+    filepath = "../data/mocks/logs/auto_conv_encoder_lr"+str(lr)+\
+        "_f"+str(features)+"_k"+str(kernel[0])+"_sqerr.hdf5"
 
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
         save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
-    model.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
-        verbose=2, validation_data=test_data, callbacks=[tensorboard,callbacks])
+    model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
+        verbose=2, validation_data=test_data, callbacks=[callbacks])
