@@ -3,6 +3,7 @@ import keras
 from keras.models import Sequential, Model
 from keras.layers import Dense, Input, Conv2D, UpSampling2D, Flatten, MaxPooling2D
 from keras.callbacks import TensorBoard
+from keras.models import load_model
 
 def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH='', conv=False, weights=False):
     """ Build generator to load the data in chunks """
@@ -85,13 +86,14 @@ if __name__ == "__main__":
     test_data = next(test_gen)
     train_data = next(train_gen)
 
-    model2 = auto_conv_encoder(input_dim, features, kernel)
+    #model2 = auto_conv_encoder(input_dim, features, kernel)
 
-    adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
-        decay=0.00, amsgrad=True)
+    #adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
+    #    decay=0.00, amsgrad=True)
 
-    model2.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)#, sample_weight_mode="temporal")
+    #model2.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)#, sample_weight_mode="temporal")
 
+    model2 = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
     print(model2.summary())
 
     #tensorboard = TensorBoard(log_dir="../data/mocks/logs/auto_conv_encoder_lr"+str(lr)+\
