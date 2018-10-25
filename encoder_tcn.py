@@ -93,7 +93,7 @@ if __name__ == "__main__":
     epochs = 500
     steps_per_epoch = 50
 
-    n_hidden  = 50 # hidden layer, i.e. num of features
+    n_hidden  = 128 # hidden layer, i.e. num of features
     input_dim = (5400,128) # seconds in a day, number of channels -1
     time_steps = 1
     kernel = 15
