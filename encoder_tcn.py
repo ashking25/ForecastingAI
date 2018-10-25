@@ -85,7 +85,7 @@ def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH=''):
 
 if __name__ == "__main__":
     kernel_enc = (7,1)
-    features_enc = 32 # hidden layer, i.e. num of features
+    features_enc = 16 # hidden layer, i.e. num of features
     lr = 0.003
     input_dim_enc = (24*3600,1,1) # seconds in a day, number of channels -1
     batch_size = 2
