@@ -22,7 +22,7 @@ def auto_conv_encoder_only(model1, inputs, features, kernel, pool=2):
     conv4 = Conv2D(features*8, kernel, weights=model1.layers[7].get_weights(), trainable=False)(pool3)
     pool4 = MaxPooling2D((pool,1), weights=model1.layers[8].get_weights(), trainable=False)(conv4)
 
-    return pool
+    return pool4
 
 
 
