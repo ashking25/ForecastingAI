@@ -84,7 +84,7 @@ if __name__ == "__main__":
     lr = 0.00003
     input_dim = (24*3600,1,1) # seconds in a day, number of channels -1
     batch_size = 2
-    epochs = 500
+    epochs = 1000
     steps_per_epoch = 100
 
     train_gen = dataloader(batch_size=batch_size, num_eq=900,
