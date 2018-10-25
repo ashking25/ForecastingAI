@@ -13,14 +13,14 @@ import numpy as np
 
 def auto_conv_encoder_only(model1, inputs, features, kernel, pool=2):
     # encoder
-    conv1 = Conv2D(features, kernel,  weights=model1.layers[0].get_weights(), trainable=False)(inputs)
-    pool1 = MaxPooling2D((pool,1), weights=model1.layers[1].get_weights(), trainable=False)(conv1)
-    conv2 = Conv2D(features*2, kernel, weights=model1.layers[2].get_weights(), trainable=False)(pool1)
-    pool2 = MaxPooling2D((pool,1), weights=model1.layers[3].get_weights(), trainable=False)(conv2)
-    conv3 = Conv2D(features*4, kernel, weights=model1.layers[4].get_weights(), trainable=False)(pool2)
-    pool3 = MaxPooling2D((pool,1), weights=model1.layers[5].get_weights(), trainable=False)(conv3)
-    conv4 = Conv2D(features*8, kernel, weights=model1.layers[6].get_weights(), trainable=False)(pool3)
-    pool4 = MaxPooling2D((pool,1), weights=model1.layers[7].get_weights(), trainable=False)(conv4)
+    conv1 = Conv2D(features, kernel,  weights=model1.layers[1].get_weights(), trainable=False)(inputs)
+    pool1 = MaxPooling2D((pool,1), weights=model1.layers[2].get_weights(), trainable=False)(conv1)
+    conv2 = Conv2D(features*2, kernel, weights=model1.layers[3].get_weights(), trainable=False)(pool1)
+    pool2 = MaxPooling2D((pool,1), weights=model1.layers[4].get_weights(), trainable=False)(conv2)
+    conv3 = Conv2D(features*4, kernel, weights=model1.layers[5].get_weights(), trainable=False)(pool2)
+    pool3 = MaxPooling2D((pool,1), weights=model1.layers[6].get_weights(), trainable=False)(conv3)
+    conv4 = Conv2D(features*8, kernel, weights=model1.layers[7].get_weights(), trainable=False)(pool3)
+    pool4 = MaxPooling2D((pool,1), weights=model1.layers[8].get_weights(), trainable=False)(conv4)
 
     return pool
 
