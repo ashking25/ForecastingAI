@@ -39,7 +39,7 @@ def TCN(input_dim, time_steps, layers, features, features_enc, kernel_enc,
 
     encode = auto_conv_encoder_only(model1, inputs, features_enc, kernel_enc)
     eshape = K.int_shape(encode)
-    reshape = Reshape((eshape[0],eshape[-1]))(encode)
+    reshape = Reshape((eshape[1],eshape[-1]))(encode)
     for i in range(num_levels):
         dilation_size = int(dilation_rate ** i)
 
