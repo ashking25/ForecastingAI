@@ -87,7 +87,7 @@ def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH=''):
 if __name__ == "__main__":
     kernel_enc = (7,1)
     features_enc = 16 # hidden layer, i.e. num of features
-    lr = 0.0003
+    lr = 0.00003
     input_dim_enc = (24*3600,1,1) # seconds in a day, number of channels -1
     batch_size = 2
     epochs = 500
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     input_dim = (5400,128) # seconds in a day, number of channels -1
     time_steps = 1
     kernel = 15
-    dilation = 4.
+    dilation = 2.
     layers = int(np.ceil(np.log(((input_dim)[0]-1.)/(2.*(kernel-1))+1)/np.log(dilation)))
 
     model1 = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
