@@ -6,7 +6,7 @@ from keras.callbacks import TensorBoard
 from keras.models import load_model
 from keras.callbacks import Callback
 from keras import backend as K
-
+from keras import regularizers
 class showLR( Callback ) :
     def on_epoch_begin(self, epoch, logs=None):
         lr = float(K.get_value(self.model.optimizer.lr))
