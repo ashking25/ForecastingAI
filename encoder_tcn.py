@@ -13,13 +13,13 @@ import numpy as np
 
 def auto_conv_encoder_only(model1, inputs, features, kernel, pool=2):
     # encoder
-    conv1 = Conv2D(features, kernel,  weights=model1.layers[1].get_weights(), trainable=False)(inputs)
+    conv1 = Conv2D(features, kernel,  padding='same', weights=model1.layers[1].get_weights(), trainable=False)(inputs)
     pool1 = MaxPooling2D((pool,1), weights=model1.layers[2].get_weights(), trainable=False)(conv1)
-    conv2 = Conv2D(features*2, kernel, weights=model1.layers[3].get_weights(), trainable=False)(pool1)
+    conv2 = Conv2D(features*2, kernel, padding='same', weights=model1.layers[3].get_weights(), trainable=False)(pool1)
     pool2 = MaxPooling2D((pool,1), weights=model1.layers[4].get_weights(), trainable=False)(conv2)
-    conv3 = Conv2D(features*4, kernel, weights=model1.layers[5].get_weights(), trainable=False)(pool2)
+    conv3 = Conv2D(features*4, kernel, padding='same',weights=model1.layers[5].get_weights(), trainable=False)(pool2)
     pool3 = MaxPooling2D((pool,1), weights=model1.layers[6].get_weights(), trainable=False)(conv3)
-    conv4 = Conv2D(features*8, kernel, weights=model1.layers[7].get_weights(), trainable=False)(pool3)
+    conv4 = Conv2D(features*8, kernel, padding='same', weights=model1.layers[7].get_weights(), trainable=False)(pool3)
     pool4 = MaxPooling2D((pool,1), weights=model1.layers[8].get_weights(), trainable=False)(conv4)
 
     return pool4
@@ -87,7 +87,7 @@ def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH=''):
 if __name__ == "__main__":
     kernel_enc = (7,1)
     features_enc = 16 # hidden layer, i.e. num of features
-    lr = 0.003
+    lr = 0.0003
     input_dim_enc = (24*3600,1,1) # seconds in a day, number of channels -1
     batch_size = 2
     epochs = 500
