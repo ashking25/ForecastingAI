@@ -47,7 +47,7 @@ def auto_encoder(input_dim, features):
     return model
 
 
-def auto_conv_encoder(input_dim, features, kernel, pool=2):
+def auto_conv_encoder(input_dim, features, kernel, pool=2:
     inputs = Input(shape=input_dim)
 
     # encoder
@@ -57,7 +57,8 @@ def auto_conv_encoder(input_dim, features, kernel, pool=2):
     pool2 = MaxPooling2D((pool,1), padding='same')(conv2)
     conv3 = Conv2D(features*4, kernel, activation='relu',padding='same')(pool2)
     pool3 = MaxPooling2D((pool,1), padding='same')(conv3)
-    conv4 = Conv2D(features*8, kernel, activation='relu', padding='same')(pool3)
+    conv4 = Conv2D(features*8, kernel, activation='relu', padding='same',
+                   activity_regularizer=regularizers.l1(1e-7))(pool3)
     pool4 = MaxPooling2D((pool,1), padding='same')(conv4)
 
     # decoder
@@ -72,6 +73,7 @@ def auto_conv_encoder(input_dim, features, kernel, pool=2):
     conv13 = Conv2D(1, kernel, activation='linear', padding='same')(pool12)
 
     flat = Flatten()(conv13)
+
     model = Model(input=[inputs], output=flat)
 
     return model
@@ -107,7 +109,7 @@ if __name__ == "__main__":
     #tensorboard = TensorBoard(log_dir="../data/mocks/logs/auto_conv_encoder_lr"+str(lr)+\
     #    "_f"+str(features)+"_k"+str(kernel[0])+"_sqerr", histogram_freq=0, write_images=False)
 
-    filepath = "../data/mocks/logs/auto_conv_encoder_lr"+str(lr)+\
+    filepath = "../data/mocks/logs/auto_conv_encoder_regul_lr"+str(lr)+\
         "_f"+str(features)+"_k"+str(kernel[0])+"_sqerr.hdf5"
 
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
