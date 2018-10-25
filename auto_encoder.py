@@ -47,7 +47,7 @@ def auto_encoder(input_dim, features):
     return model
 
 
-def auto_conv_encoder(input_dim, features, kernel, pool=2:
+def auto_conv_encoder(input_dim, features, kernel, pool=2):
     inputs = Input(shape=input_dim)
 
     # encoder
