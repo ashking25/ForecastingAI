@@ -38,8 +38,9 @@ def TCN(input_dim, time_steps, layers, features, features_enc, kernel_enc,
     inputs = Input(shape=input_dim)
 
     encode = auto_conv_encoder_only(model1, inputs, features_enc, kernel_enc)
-    eshape = K.int_shape(encode)
-    reshape = Reshape((eshape[1],eshape[-1]))(encode)
+    encoder_shape = K.int_shape(encode)
+    reshape = Reshape((encoder_shape[1], encoder_shape[-1]))(encode)
+
     for i in range(num_levels):
         dilation_size = int(dilation_rate ** i)
 
@@ -99,7 +100,7 @@ if __name__ == "__main__":
     dilation = 4.
     layers = int(np.ceil(np.log(((input_dim)[0]-1.)/(2.*(kernel-1))+1)/np.log(dilation)))
 
-    model = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
+    model1 = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
 
     train_gen = dataloader(batch_size=batch_size, num_eq=900,
         PATH='/home/ashking/quake_finder/data/mocks')
@@ -111,12 +112,12 @@ if __name__ == "__main__":
 
 
     model2 = TCN(input_dim_enc, time_steps, layers, n_hidden, features_enc, kernel_enc,
-        model, dilation_rate=dilation, kernel_size=kernel, dropout=0.)
+        model1, dilation_rate=dilation, kernel_size=kernel, dropout=0.)
 
     adam = keras.optimizers.Adam(lr=0.0002, beta_1=0.9, beta_2=0.999, epsilon=None,
         decay=0.01, amsgrad=False)
 
     model2.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)
 
-    print(model.summary())
+    print(model2.summary())
     print('layers',layers)
