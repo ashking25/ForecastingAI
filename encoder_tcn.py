@@ -121,3 +121,15 @@ if __name__ == "__main__":
 
     print(model2.summary())
     print('layers',layers)
+
+
+    filepath = "../data/mocks/logs/auto_tcn_encoder_lr"+str(lr)+\
+        "_f"+str(n_hidden)+"_k"+str(kernel)+"_l"+str(layers)+"_sqerr.hdf5"
+
+    callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
+        save_best_only=True, save_weights_only=False, mode='auto', period=10)
+
+    #lr_tracker = showLR()
+    # cycle through, i think starting again is good for some reason
+    model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
+            verbose=2, validation_data=test_data, callbacks=[callbacks])
