@@ -72,18 +72,20 @@ def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH=''):
             start = i*batch_size
             y = []
             data = []
+            sample_weights = []
 
             for j, (EQ, day) in enumerate(zip(number_EQ[start:start+batch_size],
                 number_days[start:start+batch_size])):
                 data += [np.load(PATH+'/EQ'+str(EQ)+'_'+str(day)+'daysuntilEQ.npy')]
                 y += [day]
-
+                sample_weights+=[30-day]
 
             data = np.array(data)
             y = np.array(y)
+            sample_weights = np.array(sample_weights)
             data0 = np.reshape(data,(len(data),data.shape[1],1,1))
 
-            yield (data0, y)
+            yield (data0, y, sample_weights)
 
 
 if __name__ == "__main__":
@@ -125,7 +127,7 @@ if __name__ == "__main__":
     print('layers',layers)
 
 
-    filepath = "../data/mocks/logs/auto_tcn_encoder_lr"+str(lr)+\
+    filepath = "../data/mocks/logs/auto_tcn_encoder_sample_weights_lr"+str(lr)+\
         "_f"+str(n_hidden)+"_k"+str(kernel)+"_l"+str(layers)+"_sqerr.hdf5"
 
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
