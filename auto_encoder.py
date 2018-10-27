@@ -23,20 +23,24 @@ def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH='', conv=
             start = i*batch_size
             y = []
             data = []
-
+            sample_weights = []
             for j, (EQ, day) in enumerate(zip(number_EQ[start:start+batch_size],
                 number_days[start:start+batch_size])):
                 data += [np.load(PATH+'/EQ'+str(EQ)+'_'+str(day)+'daysuntilEQ.npy')]
                 y += [day]
-
+                sample_weights += [30-day]
 
             data = np.array(data)
-
+            sample_weights = np.array(sample_weights)
             if conv:
                 data0 = np.reshape(data,(len(data),data.shape[1],1,1))
-                yield (data0, data)
+                if weights:
+                    yield (data0, data, sample_weights)
+                else:
+                    yield (data0, data)
+
             else:
-                yield (data, data)
+                yield (data, np.array(y))
 
 
 def auto_encoder(input_dim, features):
@@ -109,7 +113,7 @@ if __name__ == "__main__":
     #tensorboard = TensorBoard(log_dir="../data/mocks/logs/auto_conv_encoder_lr"+str(lr)+\
     #    "_f"+str(features)+"_k"+str(kernel[0])+"_sqerr", histogram_freq=0, write_images=False)
 
-    filepath = "../data/mocks/logs/auto_conv_encoder_regul_lr"+str(lr)+\
+    filepath = "../data/mocks/logs/auto_conv_encoder_regul_sample_weights_lr"+str(lr)+\
         "_f"+str(features)+"_k"+str(kernel[0])+"_sqerr.hdf5"
 
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
