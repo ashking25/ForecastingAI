@@ -9,6 +9,7 @@ from keras.callbacks import Callback
 from keras.initializers import RandomNormal
 from keras import backend as K
 import numpy as np
+from keras import regularizers
 
 
 def auto_conv_encoder_only(model1, inputs, features, kernel, pool=2):
@@ -44,17 +45,18 @@ def TCN(input_dim, time_steps, layers, features, features_enc, kernel_enc,
     for i in range(num_levels):
         dilation_size = int(dilation_rate ** i)
 
-        out_channels = num_channels[i]
+        out_channels = num_channels[i]*2**(i//2)
         if i == 0:
             mod = ResidualBlock(reshape, out_channels, kernel_size, dilation_size, dropout)
         else:
             mod = ResidualBlock(mod, out_channels, kernel_size, dilation_size, dropout)
     cEnd = Conv1D(1, kernel_size=1, dilation_rate=1, activation='sigmoid',\
-               padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(mod)
+               padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01),
+               activity_regularizer=regularizers.l1(1e-7))(mod)
     bcEnd = BatchNormalization()(cEnd)
     mod1 = Flatten()(bcEnd)
     mod2 = Dense(1,activation='relu', kernel_initializer=RandomNormal(mean=0, stddev=0.01),
-        bias_initializer=keras.initializers.Constant(value=14.))(mod1) # the last output should be able to reach all of y values
+            bias_initializer=keras.initializers.Constant(value=14.))(mod1) # the last output should be able to reach all of y values
     model = Model(input=[inputs], output=mod2)
     return model
 
@@ -93,14 +95,14 @@ if __name__ == "__main__":
     epochs = 500
     steps_per_epoch = 50
 
-    n_hidden  = 128 # hidden layer, i.e. num of features
+    n_hidden  = 16 # hidden layer, i.e. num of features
     input_dim = (5400,128) # seconds in a day, number of channels -1
     time_steps = 1
     kernel = 15
     dilation = 2.
     layers = int(np.ceil(np.log(((input_dim)[0]-1.)/(2.*(kernel-1))+1)/np.log(dilation)))
 
-    model1 = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
+    model1 = load_model('../data/mocks/logs/auto_conv_encoder_regul_lr3e-05_f16_k7_sqerr.hdf5')
 
     train_gen = dataloader(batch_size=batch_size, num_eq=900,
         PATH='/home/ashking/quake_finder/data/mocks')
@@ -114,7 +116,7 @@ if __name__ == "__main__":
     model2 = TCN(input_dim_enc, time_steps, layers, n_hidden, features_enc, kernel_enc,
         model1, dilation_rate=dilation, kernel_size=kernel, dropout=0.)
 
-    adam = keras.optimizers.Adam(lr=0.0002, beta_1=0.9, beta_2=0.999, epsilon=None,
+    adam = keras.optimizers.Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=None,
         decay=0.01, amsgrad=False)
 
     model2.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)
@@ -131,5 +133,9 @@ if __name__ == "__main__":
 
     #lr_tracker = showLR()
     # cycle through, i think starting again is good for some reason
-    model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
+    model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=20,
             verbose=2, validation_data=test_data, callbacks=[callbacks])
+
+    K.set_value(model2.optimizer.lr, 1e-7)
+    model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
+            verbose=2, validation_data=test_data)
