@@ -93,7 +93,7 @@ if __name__ == "__main__":
     input_dim_enc = (24*3600,1,1) # seconds in a day, number of channels -1
     batch_size = 2
     epochs = 500
-    steps_per_epoch = 50
+    steps_per_epoch = 100
 
     n_hidden  = 64 # hidden layer, i.e. num of features
     input_dim = (5400,128) # seconds in a day, number of channels -1
