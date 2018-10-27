@@ -92,7 +92,7 @@ if __name__ == "__main__":
     steps_per_epoch = 100
 
     train_gen = dataloader(batch_size=batch_size, num_eq=900,
-        PATH='/home/ashking/quake_finder/data/mocks',conv=True, weight= True)
+        PATH='/home/ashking/quake_finder/data/mocks',conv=True, weights= True)
     test_gen  = dataloader(batch_size=25, nstart=901, num_eq=1000,
         PATH='/home/ashking/quake_finder/data/mocks',conv=True, weights=True) #
 
