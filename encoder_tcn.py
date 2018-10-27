@@ -95,7 +95,7 @@ if __name__ == "__main__":
     epochs = 500
     steps_per_epoch = 50
 
-    n_hidden  = 16 # hidden layer, i.e. num of features
+    n_hidden  = 64 # hidden layer, i.e. num of features
     input_dim = (5400,128) # seconds in a day, number of channels -1
     time_steps = 1
     kernel = 15
@@ -138,4 +138,4 @@ if __name__ == "__main__":
 
     K.set_value(model2.optimizer.lr, 1e-7)
     model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
-            verbose=2, validation_data=test_data)
+            verbose=2, validation_data=test_data, callbacks=[callbacks])
