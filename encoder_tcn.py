@@ -45,7 +45,7 @@ def TCN(input_dim, time_steps, layers, features, features_enc, kernel_enc,
     #reshape = Reshape((encoder_shape[1], encoder_shape[-1]))(encode)
 
     for i in range(num_levels):
-        dilation_size = int(dilation_rate ** i)
+        dilation_size = int(dilation_rate[0] ** i)
 
         out_channels = num_channels[i]*2**(i//2)
         if i == 0:
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     input_dim = (5400, 1, 128) # seconds in a day, number of channels -1
     time_steps = 1
     kernel = (15,1)
-    dilation = 2.
+    dilation = (2.,1)
     layers = int(np.ceil(np.log(((input_dim)[0]-1.)/(2.*(kernel[0]-1))+1)/np.log(dilation)))
 
     model1 = load_model('../data/mocks/logs/auto_conv_encoder_regul_lr3e-05_f16_k7_sqerr.hdf5')
