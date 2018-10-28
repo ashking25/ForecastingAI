@@ -129,7 +129,7 @@ if __name__ == "__main__":
     print('layers',layers)
 
 
-    filepath = "../data/mocks/logs/auto_tcn_encoder_sample_weights_lr"+str(lr)+\
+    filepath = "../data/mocks/logs/auto_tcn_encoder_lr"+str(lr)+\
         "_f"+str(n_hidden)+"_k"+str(kernel)+"_l"+str(layers)+"_sqerr.hdf5"
 
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
