@@ -56,12 +56,13 @@ def TCN(input_dim, time_steps, layers, features, features_enc, kernel_enc,
     bcEnd = BatchNormalization()(cEnd)
     mod1 = Flatten()(bcEnd)
     mod2 = Dense(1,activation='relu', kernel_initializer=RandomNormal(mean=0, stddev=0.01),
-            bias_initializer=keras.initializers.Constant(value=14.))(mod1) # the last output should be able to reach all of y values
+            bias_initializer=keras.initializers.Constant(value=14.),
+            max_value=40, threshold=-10.0)(mod1) # the last output should be able to reach all of y values
     model = Model(input=[inputs], output=mod2)
     return model
 
 
-def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH=''):
+def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH='', weights=False):
     """ Build generator to load the data in chunks """
     while True:
         number_EQ = np.random.randint(nstart, num_eq, num_eq*num_days) # draw a random distribution of events
@@ -84,9 +85,10 @@ def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH=''):
             y = np.array(y)
             sample_weights = np.array(sample_weights)
             data0 = np.reshape(data,(len(data),data.shape[1],1,1))
-
-            yield (data0, y, sample_weights)
-
+            if weights:
+                yield (data0, y, sample_weights)
+            else:
+                yield (data0, y)
 
 if __name__ == "__main__":
     kernel_enc = (7,1)
