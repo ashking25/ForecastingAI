@@ -49,7 +49,7 @@ def TCN(input_dim, time_steps, layers, features, dilation_rate=2., kernel_size=(
     for i in range(num_levels):
         dilation_size = (int(dilation_rate ** i),1)
 
-        out_channels = num_channels[i]
+        out_channels = num_channels[i]*2**i
         if i == 0:
             mod = ResidualBlock(inputs, out_channels, kernel_size, dilation_size, dropout)
         else:
@@ -58,9 +58,9 @@ def TCN(input_dim, time_steps, layers, features, dilation_rate=2., kernel_size=(
                padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(mod)
     bcEnd = BatchNormalization()(cEnd)
     #
-    reshape = Reshape((input_dim[1],input_dim[0]))(cEnd)
-    mod0 = Dense(256, activation='relu')(reshape)
-    mod1 = Flatten()(mod0)
+    #reshape = Reshape((input_dim[1],input_dim[0]))(cEnd)
+    #mod0 = Dense(256, activation='relu')(reshape)
+    mod1 = Flatten()(cEnd)
     mod2 = Dense(1,activation='linear', kernel_initializer=RandomNormal(mean=0, stddev=0.01),
         bias_initializer=keras.initializers.Constant(value=14.))(mod1) # the last output should be able to reach all of y values
     model = Model(input=[inputs], output=mod2)
