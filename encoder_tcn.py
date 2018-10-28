@@ -52,9 +52,8 @@ def TCN(input_dim, time_steps, layers, features, features_enc, kernel_enc,
             mod = ResidualBlock(encode, out_channels, kernel_size, dilation_size, dropout)
         else:
             mod = ResidualBlock(mod, out_channels, kernel_size, dilation_size, dropout)
-    cEnd = Conv2D(1, kernel_size=(1,1), dilation_rate=1, activation='sigmoid',\
-               padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01),
-               activity_regularizer=regularizers.l1(1e-7))(mod)
+    cEnd = Conv2D(1, kernel_size=(1,1),  activation='sigmoid',\
+               padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(mod)
     bcEnd = BatchNormalization()(cEnd)
     mod1 = Flatten()(bcEnd)
     mod2 = Dense(1,activation=custom_activation, kernel_initializer=RandomNormal(mean=0, stddev=0.01),
