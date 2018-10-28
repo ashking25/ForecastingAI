@@ -55,9 +55,9 @@ def TCN(input_dim, time_steps, layers, features, features_enc, kernel_enc,
                activity_regularizer=regularizers.l1(1e-7))(mod)
     bcEnd = BatchNormalization()(cEnd)
     mod1 = Flatten()(bcEnd)
-    mod2 = Dense(1,activation='relu', kernel_initializer=RandomNormal(mean=0, stddev=0.01),
-            bias_initializer=keras.initializers.Constant(value=14.),
-            max_value=40, threshold=-10.0)(mod1) # the last output should be able to reach all of y values
+    relu = keras.activations.relu(max_value=40, threshold=-10.0)
+    mod2 = Dense(1,activation=relu, kernel_initializer=RandomNormal(mean=0, stddev=0.01),
+            bias_initializer=keras.initializers.Constant(value=14.))(mod1) # the last output should be able to reach all of y values
     model = Model(input=[inputs], output=mod2)
     return model
 
