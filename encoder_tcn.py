@@ -101,11 +101,11 @@ if __name__ == "__main__":
     steps_per_epoch = 100
 
     n_hidden  = 64 # hidden layer, i.e. num of features
-    input_dim = (5400,128) # seconds in a day, number of channels -1
+    input_dim = (5400, 1, 128) # seconds in a day, number of channels -1
     time_steps = 1
-    kernel = 15
+    kernel = (15,1)
     dilation = 2.
-    layers = int(np.ceil(np.log(((input_dim)[0]-1.)/(2.*(kernel-1))+1)/np.log(dilation)))
+    layers = int(np.ceil(np.log(((input_dim)[0]-1.)/(2.*(kernel[0]-1))+1)/np.log(dilation)))
 
     model1 = load_model('../data/mocks/logs/auto_conv_encoder_regul_lr3e-05_f16_k7_sqerr.hdf5')
 
