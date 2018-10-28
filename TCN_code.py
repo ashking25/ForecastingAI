@@ -7,7 +7,7 @@ from keras.layers import Flatten, Input
 from keras.layers import Add, Dropout, BatchNormalization
 from keras.models import *
 from keras.initializers import RandomNormal
-
+from keras import regularizers
 
 def ResidualBlock(inputs, n_outputs, k, d, dropout_rate):
     """ Residual block
