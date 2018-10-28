@@ -4,7 +4,7 @@ import keras
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D
 from keras.layers import Flatten, Input
-from keras.layers import Add, Dropout, BatchNormalization
+from keras.layers import Add, Dropout, BatchNormalization, Reshape
 from keras.models import *
 from keras.initializers import RandomNormal
 from keras import regularizers
@@ -57,7 +57,10 @@ def TCN(input_dim, time_steps, layers, features, dilation_rate=2., kernel_size=(
     cEnd = Conv2D(1, kernel_size=(1,1), dilation_rate=1, activation='sigmoid',\
                padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(mod)
     bcEnd = BatchNormalization()(cEnd)
-    mod1 = Flatten()(bcEnd)
+    #
+    reshape = Reshape((input_dim[1],input_dim[0]))(cEnd)
+    mod0 = Dense(256, activation='relu')(reshape)
+    mod1 = Flatten()(mod0)
     mod2 = Dense(1,activation='linear', kernel_initializer=RandomNormal(mean=0, stddev=0.01),
         bias_initializer=keras.initializers.Constant(value=14.))(mod1) # the last output should be able to reach all of y values
     model = Model(input=[inputs], output=mod2)
