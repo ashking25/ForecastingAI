@@ -32,7 +32,8 @@ def ResidualBlock(inputs, n_outputs, k, d, dropout_rate):
     e = Dense(n_outputs, activation=None)(inputs)
     f = Add()([e, d2])
     g = Dense(n_outputs, activation='relu', name='ResidBlock_'+str(d[0]),
-        kernel_initializer=RandomNormal(mean=0, stddev=0.01))(f)
+        kernel_initializer=RandomNormal(mean=0, stddev=0.01),\
+        activity_regularizer=regularizers.l1(1e-7))(f)
     return g
 
 
