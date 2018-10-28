@@ -2,7 +2,7 @@
 from TCN_code import ResidualBlock
 import keras
 from keras.models import Sequential, Model
-from keras.layers import Dense, Conv2D, MaxPooling2D, UpSampling2D, Conv1D
+from keras.layers import Dense, Conv2D, MaxPooling2D, UpSampling2D, Conv1D, Activation
 from keras.layers import Flatten, Input, BatchNormalization, Reshape
 from keras.models import load_model
 from keras.callbacks import Callback
@@ -55,8 +55,7 @@ def TCN(input_dim, time_steps, layers, features, features_enc, kernel_enc,
                activity_regularizer=regularizers.l1(1e-7))(mod)
     bcEnd = BatchNormalization()(cEnd)
     mod1 = Flatten()(bcEnd)
-    relu = keras.layers.ReLU(max_value=40)
-    mod2 = Dense(1,activation=relu, kernel_initializer=RandomNormal(mean=0, stddev=0.01),
+    mod2 = Dense(1,activation=Activation('relu',max_value=30), kernel_initializer=RandomNormal(mean=0, stddev=0.01),
             bias_initializer=keras.initializers.Constant(value=14.))(mod1) # the last output should be able to reach all of y values
     model = Model(input=[inputs], output=mod2)
     return model
