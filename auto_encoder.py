@@ -12,7 +12,8 @@ class showLR( Callback ) :
         lr = float(K.get_value(self.model.optimizer.lr))
         print(" epoch={:02d}, lr={:.5f}".format( epoch, lr ))
 
-def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH='', conv=False, weights=False):
+
+def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH='', conv=False, weights=False, yvals='series'):
     """ Build generator to load the data in chunks """
     while True:
         number_EQ = np.random.randint(nstart, num_eq, num_eq*num_days) # draw a random distribution of events
@@ -24,23 +25,32 @@ def dataloader(batch_size=10, nstart=0, num_eq=1000, num_days=30, PATH='', conv=
             y = []
             data = []
             sample_weights = []
+
             for j, (EQ, day) in enumerate(zip(number_EQ[start:start+batch_size],
                 number_days[start:start+batch_size])):
                 data += [np.load(PATH+'/EQ'+str(EQ)+'_'+str(day)+'daysuntilEQ.npy')]
                 y += [day]
                 sample_weights += [30-day]
 
+
             data = np.array(data)
+            if yvals == 'days':
+                y = np.array(y)
+            elif yvals == 'series':
+                y = np.copy(data)
+                y[np.where(np.abs(y) < 2.5)] = 0
             sample_weights = np.array(sample_weights)
             if conv:
                 data0 = np.reshape(data,(len(data),data.shape[1],1,1))
                 if weights:
-                    yield (data0, data, sample_weights)
+                    yield (data0, y, sample_weights)
                 else:
-                    yield (data0, data)
-
+                    yield (data0, y)
             else:
-                yield (data, np.array(y))
+                if weights:
+                    yield (data, y, sample_weights)
+                else:
+                    yield (data, y)
 
 
 def auto_encoder(input_dim, features):
@@ -55,12 +65,12 @@ def auto_conv_encoder(input_dim, features, kernel, pool=2):
     inputs = Input(shape=input_dim)
 
     # encoder
-    conv1 = Conv2D(features, kernel, activation='relu',padding='same')(inputs)
-    pool1 = MaxPooling2D((pool,1), padding='same')(conv1)
-    conv2 = Conv2D(features*2, kernel, activation='relu',padding='same')(pool1)
-    pool2 = MaxPooling2D((pool,1), padding='same')(conv2)
-    conv3 = Conv2D(features*4, kernel, activation='relu',padding='same')(pool2)
-    pool3 = MaxPooling2D((pool,1), padding='same')(conv3)
+    conv1 = Conv2D(features, kernel, activation='relu', padding='same')(inputs)
+    pool1 = MaxPooling2D((pool, 1), padding='same')(conv1)
+    conv2 = Conv2D(features*2, kernel, activation='relu', padding='same')(pool1)
+    pool2 = MaxPooling2D((pool, 1), padding='same')(conv2)
+    conv3 = Conv2D(features*4, kernel, activation='relu', padding='same')(pool2)
+    pool3 = MaxPooling2D((pool, 1), padding='same')(conv3)
     conv4 = Conv2D(features*8, kernel, activation='relu', padding='same',
                    activity_regularizer=regularizers.l1(1e-7))(pool3)
     pool4 = MaxPooling2D((pool,1), padding='same')(conv4)
@@ -119,7 +129,10 @@ if __name__ == "__main__":
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
         save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
-    #lr_tracker = showLR()
-    # cycle through, i think starting again is good for some reason
+
+    model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=20,
+                verbose=2, validation_data=test_data, callbacks=[callbacks])
+
+    K.set_value(model2.optimizer.lr, lr)
     model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
             verbose=2, validation_data=test_data, callbacks=[callbacks])
