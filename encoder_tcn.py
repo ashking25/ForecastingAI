@@ -42,17 +42,17 @@ def TCN(input_dim, time_steps, layers, features, features_enc, kernel_enc,
 
     encode = auto_conv_encoder_only(model1, inputs, features_enc, kernel_enc)
     encoder_shape = K.int_shape(encode)
-    reshape = Reshape((encoder_shape[1], encoder_shape[-1]))(encode)
+    #reshape = Reshape((encoder_shape[1], encoder_shape[-1]))(encode)
 
     for i in range(num_levels):
         dilation_size = int(dilation_rate ** i)
 
         out_channels = num_channels[i]*2**(i//2)
         if i == 0:
-            mod = ResidualBlock(reshape, out_channels, kernel_size, dilation_size, dropout)
+            mod = ResidualBlock(encode, out_channels, kernel_size, dilation_size, dropout)
         else:
             mod = ResidualBlock(mod, out_channels, kernel_size, dilation_size, dropout)
-    cEnd = Conv1D(1, kernel_size=1, dilation_rate=1, activation='sigmoid',\
+    cEnd = Conv2D(1, kernel_size=(1,1), dilation_rate=1, activation='sigmoid',\
                padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01),
                activity_regularizer=regularizers.l1(1e-7))(mod)
     bcEnd = BatchNormalization()(cEnd)
