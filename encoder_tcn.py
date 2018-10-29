@@ -50,12 +50,12 @@ def TCN(input_dim, time_steps, layers, features, features_enc, kernel_enc,
         out_channels = num_channels[i]*2**(i//2)
         if i == 0:
             mod = ResidualBlock(encode, out_channels, kernel_size, dilation_size, dropout)
-            pool = MaxPooling2D(pool_size=(2, 1))(mod)
+            #pool = MaxPooling2D(pool_size=(2, 1))(mod)
         else:
-            mod = ResidualBlock(pool, out_channels, kernel_size, dilation_size, dropout)
-            pool = MaxPooling2D(pool_size=(2, 1))(mod)
+            mod = ResidualBlock(mod, out_channels, kernel_size, dilation_size, dropout)
+            #pool = MaxPooling2D(pool_size=(2, 1))(mod)
     cEnd = Conv2D(1, kernel_size=(1,1),  activation='sigmoid',\
-               padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(pool)
+               padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(mod)
     bcEnd = BatchNormalization()(cEnd)
     mod1 = Flatten()(bcEnd)
     mod2 = Dense(1,activation=custom_activation, kernel_initializer=RandomNormal(mean=0, stddev=0.01),
