@@ -134,7 +134,7 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     #mod3 = Dense(1, activation='relu', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(mod1) # the last output should be able to reach all of y values
 
     resh2 = Flatten()(mod2)
-    mod_end = Concatenate()([lstm1,resh2])
+    mod_end = Concatenate()([lstm2,resh2])
     model = Model(input=[inputs], output=mod_end)
     return model
 
