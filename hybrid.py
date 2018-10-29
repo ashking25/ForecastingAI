@@ -129,11 +129,12 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
 
     #lstm1=LSTM(features , return_sequences=True, activation='tanh')(mod2)
-    lstm2=LSTM(1, activation='linear')(glob_pool)
-    #mod1 = Flatten()(cEnd)
-    #mod2 = Dense(1, activation='linear', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(lstm2) # the last output should be able to reach all of y values
+    #lstm2=LSTM(1, activation='linear')(glob_pool)
+    mod1 = Flatten()(glob_pool)
+    mod3 = Dense(1, activation='linear', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(mod1) # the last output should be able to reach all of y values
+
     resh2 = Flatten()(mod2)
-    mod_end = Concatenate()([lstm2,resh2])
+    mod_end = Concatenate()([mod3,resh2])
     model = Model(input=[inputs], output=mod_end)
     return model
 
@@ -152,15 +153,6 @@ kernel_size  = 7
 dilation_rate = 4
 layers = int(np.ceil(np.log((input_dim[1]-1.)/(2.*(kernel_size-1))+1)/np.log(dilation_rate)))
 
-### Data ###
-train_gen = dataloader_2(timesteps, data_length, lookback=lookback, batch_size=batch_size,
-    num_eq=900, PATH='../data/mocks')
-test_gen  = dataloader_2(timesteps, data_length, lookback=lookback, batch_size=25,
-    nstart=901, num_eq=1000, PATH='/home/ashking/quake_finder/data/mocks') #
-test_data = next(test_gen)
-train_data = next(train_gen)
-
-
 ### Model ###
 model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
         dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
@@ -175,6 +167,15 @@ model2.compile(loss=mean_total_squared_error,
 
 print(model2.summary())
 print('layers', layers)
+
+### Data ###
+train_gen = dataloader_2(timesteps, data_length, lookback=lookback, batch_size=batch_size,
+    num_eq=900, PATH='../data/mocks')
+test_gen  = dataloader_2(timesteps, data_length, lookback=lookback, batch_size=25,
+    nstart=901, num_eq=1000, PATH='/home/ashking/quake_finder/data/mocks') #
+test_data = next(test_gen)
+train_data = next(train_gen)
+
 
 #tensorboard = TensorBoard(log_dir="../data/mocks/logs/hybrid_l"+str(layers)+\
 #    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+
