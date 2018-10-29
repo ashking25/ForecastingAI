@@ -60,7 +60,7 @@ def dataloader_2(timesteps, feature_length, lookback=3, batch_size=10, nstart=0,
                         newdata = reshapedata(dataset0, timesteps, feature_length)
                     else:
                         newdata = np.append(newdata, reshapedata(dataset0, timesteps, feature_length), axis=1)
-                    ynew.append((day+lookback-1-s)/float(num_days)) # normalize from 0-1
+                    ynew.append(day)#(day+lookback-1-s)/float(num_days)) # normalize from 0-1
 
                 data += [newdata]
                 y    += [ynew]
@@ -176,10 +176,10 @@ model2.compile(loss=mean_total_squared_error,
 print(model2.summary())
 print('layers', layers)
 
-tensorboard = TensorBoard(log_dir="../data/mocks/logs/hybrid_l"+str(layers)+\
-    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+
-    str(features)+"_lr"+str(lr)+"_sqerr", \
-    histogram_freq=0, write_images=True)
+#tensorboard = TensorBoard(log_dir="../data/mocks/logs/hybrid_l"+str(layers)+\
+#    "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+
+#    str(features)+"_lr"+str(lr)+"_sqerr", \
+#    histogram_freq=0, write_images=True)
 
 filepath = "../data/mocks/logs/model_hybrid_l"+str(layers)+\
     "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+\
@@ -189,7 +189,7 @@ callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
     verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
 model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=20, verbose=2, \
-        validation_data=test_data, callbacks=[tensorboard, callbacks])
+        validation_data=test_data, callbacks=[callbacks])
 
 K.set_value(model2.optimizer.lr, 1e-5)
 model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
