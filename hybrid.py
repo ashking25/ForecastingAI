@@ -11,6 +11,7 @@ from keras.models import *
 from keras.callbacks import TensorBoard
 from keras.initializers import RandomNormal
 from keras import backend as K
+from keras import regularizers
 
 def binary_lstm_accuracy(y_true, y_pred):
     #want the accuracy just for the lstm output
@@ -96,7 +97,8 @@ def ResidualBlock(inputs, n_outputs, k, d, dropout_rate):
     e = TimeDistributed(Dense(n_outputs, activation=None))(inputs)
     f = Add()([e, d1])
     g = TimeDistributed(Dense(n_outputs, activation='relu', name='ResidBlock_'+str(d), \
-              kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(f)
+              kernel_initializer=RandomNormal(mean=0, stddev=0.01),
+              activity_regularizer=regularizers.l1(1e-7)))(f)
     return g
 
 
