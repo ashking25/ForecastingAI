@@ -188,5 +188,9 @@ filepath = "../data/mocks/logs/model_hybrid_l"+str(layers)+\
 callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
     verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
-model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs, verbose=2, \
+model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=20, verbose=2, \
         validation_data=test_data, callbacks=[tensorboard, callbacks])
+
+K.set_value(model2.optimizer.lr, 1e-5)
+model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
+        verbose=2, validation_data=test_data, callbacks=[callbacks])
