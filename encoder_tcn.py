@@ -104,7 +104,7 @@ if __name__ == "__main__":
     time_steps = 1
     kernel = (15,1)
     dilation = (2.,1)
-    layers = int(np.ceil(np.log(((input_dim)[0]-1.)/(2.*(kernel[0]-1))+1)/np.log(dilation)))
+    layers = int(np.ceil(np.log(((input_dim)[0]-1.)/(2.*(kernel[0]-1))+1)/np.log(dilation[0])))
 
     model1 = load_model('../data/mocks/logs/auto_conv_encoder_regul_lr3e-05_f16_k7_sqerr.hdf5')
 
