@@ -5,7 +5,7 @@ import pandas as pd
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, TimeDistributed, Conv1D, MaxPooling1D
-from keras.layers import LSTM, Reshape, Flatten, Input
+from keras.layers import LSTM, Reshape, Flatten, Input, GlobalMaxPooling1D
 from keras.layers import Add, Dropout, BatchNormalization, Concatenate
 from keras.models import *
 from keras.callbacks import TensorBoard
@@ -88,13 +88,13 @@ def ResidualBlock(inputs, n_outputs, k, d, dropout_rate):
                padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(inputs)
     b1 = TimeDistributed(BatchNormalization())(c1)
     d1 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b1)
-    c2 = TimeDistributed(Conv1D(n_outputs, kernel_size=k, dilation_rate=d, \
-                activation='relu', padding='same', \
-                kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(d1)
-    b2 = TimeDistributed(BatchNormalization())(c2)
-    d2 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b2)
+    #c2 = TimeDistributed(Conv1D(n_outputs, kernel_size=k, dilation_rate=d, \
+    #            activation='relu', padding='same', \
+    #            kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(d1)
+    #b2 = TimeDistributed(BatchNormalization())(c2)
+    #d2 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b2)
     e = TimeDistributed(Dense(n_outputs, activation=None))(inputs)
-    f = Add()([e, d2])
+    f = Add()([e, d1])
     g = TimeDistributed(Dense(n_outputs, activation='relu', name='ResidBlock_'+str(d), \
               kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(f)
     return g
@@ -125,8 +125,11 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     mod2 = TimeDistributed(Dense(1, activation='relu', \
         kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(resh) # the last output should be able to reach all of y values
 
+
+    glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
+
     #lstm1=LSTM(features , return_sequences=True, activation='tanh')(mod2)
-    lstm2=LSTM(1, activation='linear')(mod2)
+    lstm2=LSTM(1, activation='linear')(glob_pool)
     #mod1 = Flatten()(cEnd)
     #mod2 = Dense(1, activation='linear', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(lstm2) # the last output should be able to reach all of y values
     resh2 = Flatten()(mod2)
@@ -144,7 +147,7 @@ lookback = 5
 input_dim = (int(timesteps*lookback), int(data_length), 1)
 dropout = 0
 features = 1 # number of features in lstm
-n_hidden = 50 # number of featurs in TCN
+n_hidden = 64 # number of featurs in TCN
 kernel_size  = 7
 dilation_rate = 4
 layers = int(np.ceil(np.log((input_dim[1]-1.)/(2.*(kernel_size-1))+1)/np.log(dilation_rate)))
