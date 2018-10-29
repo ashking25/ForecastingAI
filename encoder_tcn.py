@@ -3,7 +3,7 @@ from TCN_code import ResidualBlock
 import keras
 from keras.models import Sequential, Model
 from keras.layers import Dense, Conv2D, MaxPooling2D, UpSampling2D, Conv1D, Activation
-from keras.layers import Flatten, Input, BatchNormalization, Reshape
+from keras.layers import Flatten, Input, BatchNormalization, Reshape, MaxPooling2D
 from keras.models import load_model
 from keras.callbacks import Callback
 from keras.initializers import RandomNormal
@@ -42,18 +42,20 @@ def TCN(input_dim, time_steps, layers, features, features_enc, kernel_enc,
 
     encode = auto_conv_encoder_only(model1, inputs, features_enc, kernel_enc)
     encoder_shape = K.int_shape(encode)
-    reshape = Reshape((encoder_shape[1], encoder_shape[3], encoder_shape[2]))(encode)
+    #reshape = Reshape((encoder_shape[1], encoder_shape[3], encoder_shape[2]))(encode)
 
     for i in range(num_levels):
         dilation_size = (int(dilation_rate[0] ** i), dilation_rate[1])
 
         out_channels = num_channels[i]*2**(i//2)
         if i == 0:
-            mod = ResidualBlock(reshape, out_channels, kernel_size, dilation_size, dropout)
+            mod = ResidualBlock(encode, out_channels, kernel_size, dilation_size, dropout)
+            pool = MaxPooling2D(pool_size=(2, 1))(mod)
         else:
-            mod = ResidualBlock(mod, out_channels, kernel_size, dilation_size, dropout)
+            mod = ResidualBlock(pool, out_channels, kernel_size, dilation_size, dropout)
+            pool = MaxPooling2D(pool_size=(2, 1))(mod)
     cEnd = Conv2D(1, kernel_size=(1,1),  activation='sigmoid',\
-               padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(mod)
+               padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(pool)
     bcEnd = BatchNormalization()(cEnd)
     mod1 = Flatten()(bcEnd)
     mod2 = Dense(1,activation=custom_activation, kernel_initializer=RandomNormal(mean=0, stddev=0.01),
