@@ -88,11 +88,11 @@ def ResidualBlock(inputs, n_outputs, k, d, dropout_rate):
                padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(inputs)
     b1 = TimeDistributed(BatchNormalization())(c1)
     d1 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b1)
-    #c2 = TimeDistributed(Conv1D(n_outputs, kernel_size=k, dilation_rate=d, \
-    #            activation='relu', padding='same', \
-    #            kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(d1)
-    #b2 = TimeDistributed(BatchNormalization())(c2)
-    #d2 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b2)
+    c2 = TimeDistributed(Conv1D(n_outputs, kernel_size=k, dilation_rate=d, \
+                activation='relu', padding='same', \
+                kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(d1)
+    b2 = TimeDistributed(BatchNormalization())(c2)
+    d2 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b2)
     e = TimeDistributed(Dense(n_outputs, activation=None))(inputs)
     f = Add()([e, d1])
     g = TimeDistributed(Dense(n_outputs, activation='relu', name='ResidBlock_'+str(d), \
@@ -122,7 +122,7 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     bEnd = TimeDistributed(BatchNormalization())(cEnd)
     resh = Reshape((timesteps*lookback, data_length), \
         input_shape=(timesteps*lookback, data_length, 1))(bEnd)
-    mod2 = TimeDistributed(Dense(1, activation='relu', \
+    mod2 = TimeDistributed(Dense(1, activation='linear', \
         kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(resh) # the last output should be able to reach all of y values
 
     #glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
