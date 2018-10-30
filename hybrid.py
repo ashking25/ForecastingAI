@@ -195,6 +195,6 @@ callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
 model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=20, verbose=2, \
         validation_data=test_data, callbacks=[callbacks])
 
-K.set_value(model2.optimizer.lr, 1e-6)
+K.set_value(model2.optimizer.lr, 1e-5)
 model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
         verbose=2, validation_data=test_data, callbacks=[callbacks])
