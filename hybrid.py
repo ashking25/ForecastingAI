@@ -56,14 +56,14 @@ def dataloader_2(timesteps, feature_length, lookback=3, batch_size=10, nstart=0,
 
             for j, (EQ, day) in enumerate(zip(number_EQ[start:int(start+batch_size)], number_days[start:int(start+batch_size)])):
                 newdata = ()
-                ynew = [day/float(num_days)]
+                ynew = [day]
                 for s in range(lookback):
                     dataset0 = np.load(PATH+'/EQ'+str(EQ)+'_'+str(day+lookback-1-s)+'daysuntilEQ.npy')
                     if np.size(newdata) <= 0:
                         newdata = reshapedata(dataset0, timesteps, feature_length)
                     else:
                         newdata = np.append(newdata, reshapedata(dataset0, timesteps, feature_length), axis=1)
-                    ynew.append(day)#(day+lookback-1-s)/float(num_days)) # normalize from 0-1
+                    ynew.append((day+lookback-1-s))#(day+lookback-1-s)/float(num_days)) # normalize from 0-1
 
                 data += [newdata]
                 y    += [ynew]
@@ -139,7 +139,7 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
 
     resh2 = Flatten()(mod2)
     mod_end = Concatenate()([mod3,resh2])
-    model = Model(input=[inputs], output=mod_end)
+    model = Model(input=[inputs], output=mod3)
     return model
 
 ### Data params ###
