@@ -138,7 +138,7 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
 
     resh2 = Flatten()(mod2)
     mod_end = Concatenate()([lstm2,resh2])
-    model = Model(input=[inputs], output=mod3)
+    model = Model(input=[inputs], output=mod_end)
     return model
 
 ### Data params ###
