@@ -12,6 +12,8 @@ from keras.callbacks import TensorBoard
 from keras.initializers import RandomNormal
 from keras import backend as K
 from keras import regularizers
+
+
 def custom_activation(x):
     return (K.sigmoid(x)*30.)-1
 
@@ -137,8 +139,8 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     #mod3 = Dense(1, activation='relu', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(mod1) # the last output should be able to reach all of y values
 
     resh2 = Flatten()(mod2)
-    mod_end = Concatenate()([lstm2,resh2])
-    model = Model(input=[inputs], output=mod2)
+    mod_end = Concatenate()([resh2,resh2])
+    model = Model(input=[inputs], output=mod_end)
     return model
 
 ### Data params ###
@@ -148,7 +150,8 @@ steps_per_epoch = 50# int(900/BATCH_SIZE)#*30
 timesteps = 1
 data_length = int(3600*24/timesteps)
 lookback = 1
-input_dim = (int(lookback*timesteps), int(data_length), 1)
+input_dim = (None, int(data_length), 1)
+#input_dim = (int(lookback*timesteps), int(data_length), 1)
 dropout = 0
 features = 1 # number of features in lstm
 n_hidden = 64 # number of featurs in TCN
