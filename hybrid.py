@@ -207,6 +207,6 @@ model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=20, verb
         validation_data=test_data, callbacks=[callbacks])
 
 
-K.set_value(model2.optimizer.lr, 1e-5)
+K.set_value(model2.optimizer.lr, 2e-3)
 model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
         verbose=2, validation_data=test_data, callbacks=[callbacks])
