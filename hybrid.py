@@ -138,7 +138,7 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
 
     resh2 = Flatten()(mod2)
     mod_end = Concatenate()([lstm2,resh2])
-    model = Model(input=[inputs], output=mod_end)
+    model = Model(input=[inputs], output=mod2)
     return model
 
 ### Data params ###
@@ -147,7 +147,7 @@ epochs = 200
 steps_per_epoch = 50# int(900/BATCH_SIZE)#*30
 timesteps = 1
 data_length = int(3600*24/timesteps)
-lookback = 5
+lookback = 1
 input_dim = (None, int(data_length), 1)
 dropout = 0
 features = 1 # number of features in lstm
