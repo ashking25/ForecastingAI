@@ -200,7 +200,7 @@ filepath = "../data/mocks/logs/model_hybrid_denseoutput_dense_look"+str(lookback
         str(features)+"_lr"+str(lr)+"_sqerr.hdf5"
 
 callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
-    verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
+    verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=10)
 
 
 
