@@ -130,12 +130,12 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     mod2 = TimeDistributed(Dense(1, activation='relu', \
         kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(resh) # the last output should be able to reach all of y values
 
-    glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
-    #dense1 = Dense(128, activation='relu')(resh)
+    #glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
+    dense1 = Dense(128, activation='relu')(resh)
 
     #lstm1=LSTM(features , return_sequences=True, activation='tanh')(dense1)
     #lstm2=LSTM(1, activation='relu')(glob_pool)
-    mod1 = Flatten()(glob_pool)
+    mod1 = Flatten()(dense1)
     mod3 = Dense(1, activation='relu', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(mod1) # the last output should be able to reach all of y values
 
     resh2 = Flatten()(mod2)
@@ -194,7 +194,7 @@ train_data = next(train_gen)
 #    str(features)+"_lr"+str(lr)+"_sqerr", \
 #    histogram_freq=0, write_images=True)
 
-filepath = "../data/mocks/logs/model_hybrid_dense_lstmoutput_look"+str(lookback)+"_l"+str(layers)+\
+filepath = "../data/mocks/logs/model_hybrid_denseoutput_dense_look"+str(lookback)+"_l"+str(layers)+\
     "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+\
         str(features)+"_lr"+str(lr)+"_sqerr.hdf5"
 
