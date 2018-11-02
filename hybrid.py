@@ -3,7 +3,7 @@ from time import time
 import numpy as np
 import pandas as pd
 import keras
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense, TimeDistributed, Conv1D, MaxPooling1D
 from keras.layers import LSTM, Reshape, Flatten, Input, GlobalMaxPooling1D
 from keras.layers import Add, Dropout, BatchNormalization, Concatenate
@@ -160,16 +160,20 @@ dilation_rate = 4
 layers = int(np.ceil(np.log((input_dim[1]-1.)/(2.*(kernel_size-1))+1)/np.log(dilation_rate)))
 
 ### Model ###
-model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
-        dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
+if False:
 
-#Optimizer
-lr = 0.003
-adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
-    decay=0.0, amsgrad=False)
-model2.compile(loss=mean_total_squared_error,
-    metrics=[binary_lstm_accuracy, binary_tcn_accuracy, mean_tcn_squared_error,
-    'accuracy'], optimizer=adam)
+    model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
+            dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
+
+    #Optimizer
+    lr = 0.003
+    adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
+        decay=0.0, amsgrad=False)
+    model2.compile(loss=mean_total_squared_error,
+        metrics=[binary_lstm_accuracy, binary_tcn_accuracy, mean_tcn_squared_error,
+        'accuracy'], optimizer=adam)
+eles:
+    model2= load_model('model_hybrid_look1_l7_k7_nh64_d4_f1_lr0.003_sqerr.hdf5')
 
 print(model2.summary())
 print('layers', layers)
@@ -195,8 +199,13 @@ filepath = "../data/mocks/logs/model_hybrid_look"+str(lookback)+"_l"+str(layers)
 callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
     verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
+
+
 model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=20, verbose=2, \
         validation_data=test_data, callbacks=[callbacks])
+
+
+model2 = load
 
 K.set_value(model2.optimizer.lr, 1e-5)
 model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
