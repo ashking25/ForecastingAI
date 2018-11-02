@@ -48,7 +48,7 @@ def dataloader_2(timesteps, feature_length, lookback=3, batch_size=10, nstart=0,
     """ Build generator to load the data progressively """
     while True:
         number_EQ    = np.random.randint(nstart, num_eq, num_eq*num_days) # draw a random distribution of earth quakes
-        number_days  = np.random.randint(0, num_days-lookback, num_eq*num_days) # draw randomly from 0-30 days before the quakes
+        number_days  = np.random.randint(1, num_days-lookback, num_eq*num_days) # draw randomly from 0-30 days before the quakes
         num_batch    = int(num_eq*num_days/batch_size) # number of batches
 
         for i in range(num_batch):
@@ -132,10 +132,10 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
 
     #glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
     dense1 = Dense(128, activation='relu')(resh)
-
+    bdense = BatchNormalization()(dense1)
     #lstm1=LSTM(features , return_sequences=True, activation='tanh')(dense1)
     #lstm2=LSTM(1, activation='relu')(glob_pool)
-    mod1 = Flatten()(dense1)
+    mod1 = Flatten()(bdense)
     mod3 = Dense(1, activation='relu', kernel_initializer=RandomNormal(mean=0, stddev=0.01),
         bias_initializer=keras.initializers.Constant(value=12.))(mod1) # the last output should be able to reach all of y values
 
