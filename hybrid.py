@@ -158,15 +158,15 @@ n_hidden = 64 # number of featurs in TCN
 kernel_size  = 7
 dilation_rate = 4
 layers = int(np.ceil(np.log((input_dim[1]-1.)/(2.*(kernel_size-1))+1)/np.log(dilation_rate)))
-
+#Optimizer
+lr = 0.003
 ### Model ###
 if False:
 
     model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
             dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
 
-    #Optimizer
-    lr = 0.003
+
     adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
         decay=0.0, amsgrad=False)
     model2.compile(loss=mean_total_squared_error,
