@@ -127,7 +127,7 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     bEnd = TimeDistributed(BatchNormalization())(cEnd)
     resh = Reshape((timesteps*lookback, data_length), \
         input_shape=(timesteps*lookback, data_length, 1))(bEnd)
-    mod2 = TimeDistributed(Dense(1, activation='linear', \
+    mod2 = TimeDistributed(Dense(1, activation='relu', \
         kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(resh) # the last output should be able to reach all of y values
 
     glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
@@ -139,7 +139,7 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     #mod3 = Dense(1, activation='relu', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(mod1) # the last output should be able to reach all of y values
 
     resh2 = Flatten()(mod2)
-    mod_end = Concatenate()([resh2,resh2])
+    mod_end = Concatenate()([lstm2,resh2])
     model = Model(input=[inputs], output=mod_end)
     return model
 
@@ -149,7 +149,7 @@ epochs = 200
 steps_per_epoch = 50# int(900/BATCH_SIZE)#*30
 timesteps = 1
 data_length = int(3600*24/timesteps)
-lookback = 1
+lookback = 5
 input_dim = (None, int(data_length), 1)
 #input_dim = (int(lookback*timesteps), int(data_length), 1)
 dropout = 0
