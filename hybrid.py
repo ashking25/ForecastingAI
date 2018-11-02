@@ -161,14 +161,14 @@ layers = int(np.ceil(np.log((input_dim[1]-1.)/(2.*(kernel_size-1))+1)/np.log(dil
 #Optimizer
 lr = 0.003
 ### Model ###
-if False:
+if True:
 
     model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
             dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
 
 
     adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
-        decay=0.0, amsgrad=False)
+        decay=0.01, amsgrad=False)
     model2.compile(loss=mean_total_squared_error,
         metrics=[binary_lstm_accuracy, binary_tcn_accuracy, mean_tcn_squared_error,
         'accuracy'], optimizer=adam)
@@ -203,10 +203,10 @@ callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
 
 
 
-model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=20, verbose=2, \
-        validation_data=test_data, callbacks=[callbacks])
+#model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=20, verbose=2, \
+#        validation_data=test_data, callbacks=[callbacks])
 
 
-K.set_value(model2.optimizer.lr, 2e-7)
+K.set_value(model2.optimizer.lr, 2e-3)
 model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
         verbose=2, validation_data=test_data, callbacks=[callbacks])
