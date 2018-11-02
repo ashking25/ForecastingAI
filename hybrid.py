@@ -174,7 +174,7 @@ if False:
         'accuracy'], optimizer=adam)
 else:
     model2= load_model('../data/mocks/logs/model_hybrid_look1_l7_k7_nh64_d4_f1_lr0.003_sqerr.hdf5',
-        custom_activation={'binary_lstm_accuracy':binary_lstm_accuracy,'binary_tcn_accuracy':binary_tcn_accuracy,\
+        custom_objects={'binary_lstm_accuracy':binary_lstm_accuracy,'binary_tcn_accuracy':binary_tcn_accuracy,\
         'mean_total_squared_error':mean_total_squared_error,'mean_tcn_squared_error':mean_tcn_squared_error})
 
 print(model2.summary())
