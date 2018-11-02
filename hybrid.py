@@ -130,11 +130,11 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     mod2 = TimeDistributed(Dense(1, activation='relu', \
         kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(resh) # the last output should be able to reach all of y values
 
-    #glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
-    dense1 = Dense(128, activation='relu')(resh)
+    glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
+    #dense1 = Dense(128, activation='relu')(resh)
 
     #lstm1=LSTM(features , return_sequences=True, activation='tanh')(dense1)
-    lstm2=LSTM(1, activation='relu')(dense1)
+    lstm2=LSTM(1, activation='relu')(glob_pool)
     #mod1 = Flatten()(glob_pool)
     #mod3 = Dense(1, activation='relu', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(mod1) # the last output should be able to reach all of y values
 
