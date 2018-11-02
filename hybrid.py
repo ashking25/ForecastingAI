@@ -185,7 +185,7 @@ train_data = next(train_gen)
 #    str(features)+"_lr"+str(lr)+"_sqerr", \
 #    histogram_freq=0, write_images=True)
 
-filepath = "../data/mocks/logs/model_hybrid_l"+str(layers)+\
+filepath = "../data/mocks/logs/model_hybrid_look"+str(lookback)+"_l"+str(layers)+\
     "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+\
         str(features)+"_lr"+str(lr)+"_sqerr.hdf5"
 
