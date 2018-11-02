@@ -172,7 +172,7 @@ if False:
     model2.compile(loss=mean_total_squared_error,
         metrics=[binary_lstm_accuracy, binary_tcn_accuracy, mean_tcn_squared_error,
         'accuracy'], optimizer=adam)
-eles:
+else:
     model2= load_model('model_hybrid_look1_l7_k7_nh64_d4_f1_lr0.003_sqerr.hdf5')
 
 print(model2.summary())
