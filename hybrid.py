@@ -105,7 +105,7 @@ def ResidualBlock(inputs, n_outputs, k, d, dropout_rate):
     return g
 
 
-def my_model(input_dim, time_steps, layers, features, n_hidden,
+def my_model(input_dim, time_steps, lookback, layers, features, n_hidden,
             dilation_rate=1, pooling=1, kernel_size=7, dropout=0.):
     """ LSTM with Temporal Convolution Neural Network """
 
@@ -113,6 +113,7 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     layers = []
     num_levels = len(num_channels)
     inputs = Input(shape=input_dim)
+    data_length = input_dim[1]
 
     for i in range(num_levels):
         dilation_size = int(dilation_rate**2)
@@ -125,8 +126,8 @@ def my_model(input_dim, time_steps, layers, features, n_hidden,
     cEnd = TimeDistributed(Conv1D(1, kernel_size=1, dilation_rate=1, activation='sigmoid', \
                padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(mod)
     bEnd = TimeDistributed(BatchNormalization())(cEnd)
-    resh = Reshape((timesteps*lookback, data_length), \
-        input_shape=(timesteps*lookback, data_length, 1))(bEnd)
+    resh = Reshape((time_steps*lookback, data_length), \
+        input_shape=(time_steps*lookback, data_length, 1))(bEnd)
     mod2 = TimeDistributed(Dense(1, activation='relu', \
         kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(resh) # the last output should be able to reach all of y values
 
@@ -149,8 +150,9 @@ if __name__ == "__main__":
     batch_size = 2
     epochs = 200
     steps_per_epoch = 50# int(900/BATCH_SIZE)#*30
-    timesteps = 1
-    data_length = int(3600*24/timesteps)
+    timesteps = 5
+    freq = 1
+    data_length = int(3600*24*freq/timesteps)
     lookback = 5
     #input_dim = (None, int(data_length), 1)
     input_dim = (int(lookback*timesteps), int(data_length), 1)
@@ -165,7 +167,7 @@ if __name__ == "__main__":
     ### Model ###
     if True:
 
-        model2 = my_model(input_dim, timesteps, layers, features, n_hidden,
+        model2 = my_model(input_dim, timesteps, lookback, layers, features, n_hidden,
                 dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
 
 
