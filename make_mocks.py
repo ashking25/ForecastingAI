@@ -6,7 +6,7 @@ from sklearn.preprocessing import normalize,MinMaxScaler
 import matplotlib
 
 # make baseline of counts
-freq = 60.
+freq = 1
 num = int(24*3600*freq)
 days = 30
 for i in range(10000):
@@ -22,6 +22,6 @@ for i in range(10000):
         norm = np.random.standard_normal(num)*strength
         norm_pois = np.random.poisson(lam=linear)
         norm[t>Eq] = 0
-        norm[norm_pois <=10] = 0
+        norm[norm_pois <=8] = 0
         data = s+norm
         np.save('/home/ashking/quake_finder/data/mocks/EQ'+str(i)+'_60Hz_'+str(days-d-1)+'daysuntilEQ.npy',data)
