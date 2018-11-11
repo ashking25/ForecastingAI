@@ -91,6 +91,7 @@ def ResidualBlock(inputs, n_outputs, k, d, dropout_rate):
     c1 = TimeDistributed(Conv1D(n_outputs, kernel_size=k, dilation_rate=d, \
                 input_shape=(input_dim, 1), activation='relu', \
                padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(inputs)
+               #### Should the padding here be "causal" not "same" ####
     b1 = TimeDistributed(BatchNormalization())(c1)
     d1 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b1)
     c2 = TimeDistributed(Conv1D(n_outputs, kernel_size=k, dilation_rate=d, \
