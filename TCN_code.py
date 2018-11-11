@@ -24,13 +24,13 @@ def ResidualBlock(inputs, n_outputs, k, d, dropout_rate):
                padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01))(inputs)
     b1 = BatchNormalization()(c1)
     d1 = Dropout(dropout_rate, noise_shape=(1, 1, 1, n_outputs))(b1)
-    c2 = Conv2D(n_outputs, kernel_size=k, dilation_rate=d,
-                activation='relu', padding='same',
-                kernel_initializer=RandomNormal(mean=0, stddev=0.01))(d1)
-    b2 = BatchNormalization()(c2)
-    d2 = Dropout(dropout_rate, noise_shape=(1, 1, 1, n_outputs))(b2)
+    #c2 = Conv2D(n_outputs, kernel_size=k, dilation_rate=d,
+    #            activation='relu', padding='same',
+    #            kernel_initializer=RandomNormal(mean=0, stddev=0.01))(d1)
+    #b2 = BatchNormalization()(c2)
+    #d2 = Dropout(dropout_rate, noise_shape=(1, 1, 1, n_outputs))(b2)
     e = Dense(n_outputs, activation=None)(inputs)
-    f = Add()([e, d2])
+    f = Add()([e, d1])
     g = Dense(n_outputs, activation='relu', name='ResidBlock_'+str(d[0]),
         kernel_initializer=RandomNormal(mean=0, stddev=0.01))(f)
     return g
@@ -49,7 +49,7 @@ def TCN(input_dim, time_steps, layers, features, dilation_rate=2., kernel_size=(
     for i in range(num_levels):
         dilation_size = (int(dilation_rate ** i),1)
 
-        out_channels = num_channels[i]*2**i
+        out_channels = num_channels[i]#*2**i
         if i == 0:
             mod = ResidualBlock(inputs, out_channels, kernel_size, dilation_size, dropout)
         else:
