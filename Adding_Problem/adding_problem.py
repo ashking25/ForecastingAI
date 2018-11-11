@@ -35,9 +35,9 @@ test_y = y[frac:]
 
 
 ###  Setup Parameters  ###
-LAYERS = 8 # n
-N_HIDDEN = 24 # hidden layer, i.e. num of features
-INPUT_DIM = (T,2) # seconds in a day, number of channels -1
+LAYERS = 8 # 
+N_HIDDEN = 24 # hidden layer features
+INPUT_DIM = (T,2) #
 TIME_STEPS = 1
 KERNEL_SIZE = 8 # k
 layers_effect = 1+2*(KERNEL_SIZE-1)*(2**LAYERS-1)
@@ -48,14 +48,15 @@ DROPOUT = 0.
 
 
 ### Create Model ###
-model = TCN(INPUT_DIM,TIME_STEPS,LAYERS,N_HIDDEN,kernel_size=KERNEL_SIZE,\
+model = TCN(INPUT_DIM, TIME_STEPS, LAYERS, N_HIDDEN, kernel_size=KERNEL_SIZE,\
             dropout=DROPOUT)
 adam = keras.optimizers.Adam(lr=0.002, beta_1=0.9, beta_2=0.999,\
                              epsilon=None,decay=0.0, amsgrad=False)
 model.load_weights('../data/adding_problem/tcn_weights.h5')
 model.compile(loss='mean_squared_error',  metrics=['accuracy'],\
               optimizer=adam)
-tensorboard = TensorBoard(log_dir="../data/adding_problem/logs/{}".format(time()),histogram_freq=25,write_images=True)
+tensorboard = TensorBoard(log_dir="../data/adding_problem/logs/{}".format(time()),\
+                          histogram_freq=25, write_images=True)
 
 
 ### Run Model ###
