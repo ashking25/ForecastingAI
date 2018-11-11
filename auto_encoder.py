@@ -123,7 +123,7 @@ if __name__ == "__main__":
     #tensorboard = TensorBoard(log_dir="../data/mocks/logs/auto_conv_encoder_lr"+str(lr)+\
     #    "_f"+str(features)+"_k"+str(kernel[0])+"_sqerr", histogram_freq=0, write_images=False)
 
-    filepath = "../data/mocks/logs/auto_conv_encoder_lessnoise_regul_sample_weights_lr"+str(lr)+\
+    filepath = "../data/mocks/logs/auto_conv_encoder_regul_sample_weights_lr"+str(lr)+\
         "_f"+str(features)+"_k"+str(kernel[0])+"_sqerr.hdf5"
 
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
