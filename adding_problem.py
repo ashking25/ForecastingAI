@@ -20,7 +20,7 @@ T = 600
 N = 60000
 
 ###  load data  ###
-data =[]
+data = []
 for i in range(N):
     data += [np.transpose(np.load('../data/adding_problem/data_'+str(i)+'.npy'))]
 data = np.array(data)
@@ -35,16 +35,16 @@ test_y = y[frac:]
 
 
 ###  Setup Parameters  ###
-LAYERS    = 8 # n
-N_HIDDEN  = 24 # hidden layer, i.e. num of features
+LAYERS = 8 # n
+N_HIDDEN = 24 # hidden layer, i.e. num of features
 INPUT_DIM = (T,2) # seconds in a day, number of channels -1
-TIME_STEPS    = 1
-KERNEL_SIZE   = 8 # k
+TIME_STEPS = 1
+KERNEL_SIZE = 8 # k
 layers_effect = 1+2*(KERNEL_SIZE-1)*(2**LAYERS-1)
-BATCH_SIZE    = 32
-EPOCHS        = 100
+BATCH_SIZE = 32
+EPOCHS = 100
 STEPS_PER_EPOCH = int(N/BATCH_SIZE)
-DROPOUT   = 0.
+DROPOUT = 0.
 
 
 ### Create Model ###
