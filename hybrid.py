@@ -90,12 +90,12 @@ def ResidualBlock(inputs, n_outputs, k, d, dropout_rate):
     input_dim = int(inputs.shape[3])
     c1 = TimeDistributed(Conv1D(n_outputs, kernel_size=k, dilation_rate=d, \
                 input_shape=(input_dim, 1), activation='relu', \
-               padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(inputs)
+               padding='causal', kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(inputs)
                #### Should the padding here be "causal" not "same" ####
     b1 = TimeDistributed(BatchNormalization())(c1)
     d1 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b1)
     c2 = TimeDistributed(Conv1D(n_outputs, kernel_size=k, dilation_rate=d, \
-                activation='relu', padding='same', \
+                activation='relu', padding='causal', \
                 kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(d1)
     b2 = TimeDistributed(BatchNormalization())(c2)
     d2 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b2)
@@ -117,7 +117,7 @@ def my_model(input_dim, time_steps, lookback, layers, features, n_hidden,
     data_length = input_dim[1]
 
     for i in range(num_levels):
-        dilation_size = int(dilation_rate**2)
+        dilation_size = int(dilation_rate**i)
         out_channels = num_channels[i]
         if i == 0:
             mod = ResidualBlock(inputs, out_channels, kernel_size, dilation_size, dropout)
