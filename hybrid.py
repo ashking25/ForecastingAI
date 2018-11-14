@@ -90,12 +90,12 @@ def ResidualBlock(inputs, n_outputs, k, d, dropout_rate):
     input_dim = int(inputs.shape[3])
     c1 = TimeDistributed(Conv1D(n_outputs, kernel_size=k, dilation_rate=d, \
                 input_shape=(input_dim, 1), activation='relu', \
-               padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(inputs)
+               padding='causal', kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(inputs)
                #### Should the padding here be "causal" not "same" ####
     b1 = TimeDistributed(BatchNormalization())(c1)
     d1 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b1)
     c2 = TimeDistributed(Conv1D(n_outputs, kernel_size=k, dilation_rate=d, \
-                activation='relu', padding='same', \
+                activation='relu', padding='causal', \
                 kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(d1)
     b2 = TimeDistributed(BatchNormalization())(c2)
     d2 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b2)
@@ -133,7 +133,7 @@ def my_model(input_dim, time_steps, lookback, layers, features, n_hidden,
         kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(resh) # the last output should be able to reach all of y values
 
     #glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
-    dense1 = Dense(features, activation='sigmoid')(resh)
+    dense1 = Dense(features, activation='relu')(resh)
     bdense = BatchNormalization()(dense1)
     #lstm1=LSTM(features , return_sequences=True, activation='tanh')(dense1)
     #lstm2=LSTM(1, activation='relu')(glob_pool)
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     features = 128 # number of features in lstm
     n_hidden = 64 # number of featurs in TCN
     kernel_size  = 7
-    dilation_rate = 2
+    dilation_rate = 4
     layers = int(np.ceil(np.log((input_dim[1]-1.)/(2.*(kernel_size-1))+1)/np.log(dilation_rate)))
     #Optimizer
     lr = 0.003
@@ -212,6 +212,6 @@ if __name__ == "__main__":
     #        validation_data=test_data, callbacks=[callbacks])
 
 
-    K.set_value(model2.optimizer.lr, 3e-4)
+    K.set_value(model2.optimizer.lr, 3e-3)
     model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
             verbose=2, validation_data=test_data, callbacks=[callbacks])
