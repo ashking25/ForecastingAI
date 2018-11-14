@@ -133,7 +133,7 @@ def my_model(input_dim, time_steps, lookback, layers, features, n_hidden,
         kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(resh) # the last output should be able to reach all of y values
 
     #glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
-    dense1 = Dense(128, activation='relu')(resh)
+    dense1 = Dense(features, activation='relu')(resh)
     bdense = BatchNormalization()(dense1)
     #lstm1=LSTM(features , return_sequences=True, activation='tanh')(dense1)
     #lstm2=LSTM(1, activation='relu')(glob_pool)
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     #input_dim = (None, int(data_length), 1)
     input_dim = (int(lookback*timesteps), int(data_length), 1)
     dropout = 0
-    features = 1 # number of features in lstm
+    features = 128 # number of features in lstm
     n_hidden = 64 # number of featurs in TCN
     kernel_size  = 7
     dilation_rate = 4
