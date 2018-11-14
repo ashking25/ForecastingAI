@@ -124,7 +124,7 @@ def my_model(input_dim, time_steps, lookback, layers, features, n_hidden,
         else:
             mod = ResidualBlock(mod, out_channels, kernel_size, dilation_size, dropout)
 
-    cEnd = TimeDistributed(Conv1D(1, kernel_size=1, dilation_rate=1, activation='relu', \
+    cEnd = TimeDistributed(Conv1D(1, kernel_size=1, dilation_rate=1, activation='sigmoid', \
                padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(mod)
     bEnd = TimeDistributed(BatchNormalization())(cEnd)
     resh = Reshape((time_steps*lookback, data_length), \
@@ -133,7 +133,7 @@ def my_model(input_dim, time_steps, lookback, layers, features, n_hidden,
         kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(resh) # the last output should be able to reach all of y values
 
     #glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
-    dense1 = Dense(features, activation='relu')(resh)
+    dense1 = Dense(features, activation='sigmoid')(resh)
     bdense = BatchNormalization()(dense1)
     #lstm1=LSTM(features , return_sequences=True, activation='tanh')(dense1)
     #lstm2=LSTM(1, activation='relu')(glob_pool)
