@@ -48,7 +48,7 @@ def make_data_list(PATH):
             line = fp.readline()
     f.close()
 
-def load_data(PATH,detector,year,day,lookback,freq=5):
+def load_data(PATH,detector,year,day,lookback,freq=1):
     times = Time(day[:4]+'-'+day[4:6]+'-'+day[6:8])
     t = Time(times)
     all_values =[]
@@ -61,7 +61,7 @@ def load_data(PATH,detector,year,day,lookback,freq=5):
             mag = np.load(PATH+'/'+year+'/'+letter+'_mag_volts_rs50/'+detector+'/'+previous_day+'.npy')
             derivative = np.append(mag[:-1]-mag[1:],0)
             derivative = np.transpose(derivative)
-            reshaped = np.reshape(derivative,(freq,len(derivative)/freq))
+            reshaped = np.reshape(derivative,(freq,int(len(derivative)/freq)))
             values.append(reshaped)
         values = np.array(values)
         values = np.reshape(values,(1,values.shape[1],values.shape[2],values.shape[0]))
@@ -100,7 +100,7 @@ def dataloader(freq=5, lookback=3, batch_size=10, train_percent=0.8, test=False,
 
     """ Build generator to load the data progressively """
 
-    files = np.loadtxt(PATH+file,dtype='str')
+    files = np.loadtxt(PATH[:-8]+'ForecastingAI/'+file,dtype='str')
     if test:
         files = files[int(train_percent*len(files)):]
     else:
@@ -113,17 +113,15 @@ def dataloader(freq=5, lookback=3, batch_size=10, train_percent=0.8, test=False,
             day = r[-12:-4]
             times = Time(day[:4]+'-'+day[4:6]+'-'+day[6:8])
             t = Time(times)
-            year = r[10:17]
+            year = r[7:14]
             detector = r[-17:-13]
-            freq = 5
-            lookback = 5
             if len(data) == 0:
                 data = load_data(PATH+'level2',detector, year, day, lookback, freq=freq)
             else:
                 data = np.append(data,load_data(PATH+'level2', detector, year, day,\
                 lookback, freq=freq), axis=0)
 
-            y += [set_eq_value(detector, t, lookback, PATH=PATH)]
+            y += [set_eq_value(detector, t, lookback, PATH='')]
         yield (data, np.array(y))
 
 
@@ -131,14 +129,14 @@ if __name__ == "__main__":
     batch_size = 2
     epochs = 200
     steps_per_epoch = 10# int(900/BATCH_SIZE)#*30
-    timesteps = 5
+    timesteps = 50
     freq = 50
     data_length = int(3600*24*freq/timesteps)
     lookback = 5
     #input_dim = (None, int(data_length), 1)
     input_dim = (int(lookback*timesteps), int(data_length), 3)
     dropout = 0
-    features = 1 # number of features in lstm
+    features = 64 # number of features in lstm
     n_hidden = 64 # number of featurs in TCN
     kernel_size  = 7
     dilation_rate = 4
@@ -155,22 +153,23 @@ if __name__ == "__main__":
         decay=0.01, amsgrad=False)
     model2.compile(loss='mse', metrics=['accuracy'], optimizer=adam)
 
-    print (model2.summary())
+    print(model2.summary())
     print('layers', layers)
 
 
     ### Data ###
-    print 'train'
-    train_gen = dataloader(lookback=lookback, batch_size=batch_size, train_percent=1.0, 
+    print('train')
+    train_gen = dataloader(freq=timesteps, lookback=lookback, batch_size=batch_size, train_percent=1.0, 
                            test=False, file='list_of_data_lookback5.txt')
         #PATH='../data/mocks')
-    print 'test'
-    test_gen  = dataloader(lookback=lookback, batch_size=10, train_percent=1.0, 
+    print('test')
+    test_gen  = dataloader(freq=timesteps, lookback=lookback, batch_size=2, train_percent=1.0, 
                            test=False, file='list_of_validate_data_lookback5.txt')#,
         #nstart=901, num_eq=1000, PATH='/home/ashking/quake_finder/data/mocks') #
     test_data = next(test_gen)
     train_data = next(train_gen)
 
+    print('shape',np.shape(test_data[0]))
     ### Fit ###
     filepath = "../data_qf/logs/model_hybrid_denseoutput_dense_look"+str(lookback)+"_l"+str(layers)+\
         "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+\
