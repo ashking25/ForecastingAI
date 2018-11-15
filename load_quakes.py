@@ -72,7 +72,7 @@ def load_data(PATH,detector,year,day,lookback,freq=5):
     return all_values
 
 
-def set_eq_value(detector, day, lookback, Magnitude=4.8, EQEs=0, threshold_days = 0, max_value=360,
+def set_eq_value(detector, day, lookback, Magnitude=4.8, EQEs=0, threshold_days = 0, max_value=365,
     PATH='/home/ashking/quake_finder/data_qf/'):
     #thresold_days is the number of days after an earth quake to consider, <0 is after earthquake
 
