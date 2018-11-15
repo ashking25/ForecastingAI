@@ -73,7 +73,7 @@ def load_data(PATH,detector,year,day,lookback,freq=5):
 
 
 def set_eq_value(detector, day, lookback, Magnitude=4.8, EQEs=0, threshold_days = 0, max_value=360,
-    PATH='/Users/ashking/QuakeFinders/data/'):
+    PATH='/home/ashking/quake_finder/data_qf/'):
     #thresold_days is the number of days after an earth quake to consider, <0 is after earthquake
 
     df = pd.read_csv(PATH+'Earthquakes_previous_year.csv')
@@ -96,7 +96,7 @@ def set_eq_value(detector, day, lookback, Magnitude=4.8, EQEs=0, threshold_days 
 
 
 def dataloader(freq=5, lookback=3, batch_size=10, train_percent=0.8, test=False,
-    file='list_of_data_lookback5.txt',PATH='/Users/ashking/QuakeFinders/data/'):
+    file='list_of_data_lookback5.txt',PATH='/home/ashking/quake_finder/data_qf/'):
 
     """ Build generator to load the data progressively """
 
@@ -118,9 +118,9 @@ def dataloader(freq=5, lookback=3, batch_size=10, train_percent=0.8, test=False,
             freq = 5
             lookback = 5
             if len(data) == 0:
-                data = load_data(PATH+'qf/level2',detector, year, day, lookback, freq=freq)
+                data = load_data(PATH+'level2',detector, year, day, lookback, freq=freq)
             else:
-                data = np.append(data,load_data(PATH+'qf/level2', detector, year, day,\
+                data = np.append(data,load_data(PATH+'level2', detector, year, day,\
                 lookback, freq=freq), axis=0)
 
             y += [set_eq_value(detector, t, lookback, PATH=PATH)]
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     train_data = next(train_gen)
 
     ### Fit ###
-    filepath = "../data/mocks/logs/model_hybrid_denseoutput_dense_look"+str(lookback)+"_l"+str(layers)+\
+    filepath = "../data_qf/logs/model_hybrid_denseoutput_dense_look"+str(lookback)+"_l"+str(layers)+\
         "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+\
             str(features)+"_lr"+str(lr)+"_sqerr.hdf5"
 
