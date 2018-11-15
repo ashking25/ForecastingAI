@@ -90,12 +90,12 @@ def ResidualBlock(inputs, n_outputs, k, d, dropout_rate):
     input_dim = int(inputs.shape[3])
     c1 = TimeDistributed(Conv1D(n_outputs, kernel_size=k, dilation_rate=d, \
                 input_shape=(input_dim, 1), activation='relu', \
-               padding='same', kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(inputs)
+               padding='causal', kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(inputs)
                #### Should the padding here be "causal" not "same" ####
     b1 = TimeDistributed(BatchNormalization())(c1)
     d1 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b1)
     c2 = TimeDistributed(Conv1D(n_outputs, kernel_size=k, dilation_rate=d, \
-                activation='relu', padding='same', \
+                activation='relu', padding='causal', \
                 kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(d1)
     b2 = TimeDistributed(BatchNormalization())(c2)
     d2 = TimeDistributed(Dropout(dropout_rate, noise_shape=(1, 1, n_outputs)))(b2)
@@ -117,7 +117,7 @@ def my_model(input_dim, time_steps, lookback, layers, features, n_hidden,
     data_length = input_dim[1]
 
     for i in range(num_levels):
-        dilation_size = int(dilation_rate**2)
+        dilation_size = int(dilation_rate**i)
         out_channels = num_channels[i]
         if i == 0:
             mod = ResidualBlock(inputs, out_channels, kernel_size, dilation_size, dropout)
@@ -133,7 +133,7 @@ def my_model(input_dim, time_steps, lookback, layers, features, n_hidden,
         kernel_initializer=RandomNormal(mean=0, stddev=0.01)))(resh) # the last output should be able to reach all of y values
 
     #glob_pool = TimeDistributed(GlobalMaxPooling1D())(mod)
-    dense1 = Dense(128, activation='relu')(resh)
+    dense1 = Dense(features, activation='relu')(resh)
     bdense = BatchNormalization()(dense1)
     #lstm1=LSTM(features , return_sequences=True, activation='tanh')(dense1)
     #lstm2=LSTM(1, activation='relu')(glob_pool)
@@ -151,14 +151,14 @@ if __name__ == "__main__":
     batch_size = 2
     epochs = 200
     steps_per_epoch = 50# int(900/BATCH_SIZE)#*30
-    timesteps = 5
+    timesteps = 1
     freq = 1
     data_length = int(3600*24*freq/timesteps)
     lookback = 5
     #input_dim = (None, int(data_length), 1)
     input_dim = (int(lookback*timesteps), int(data_length), 1)
     dropout = 0
-    features = 1 # number of features in lstm
+    features = 128 # number of features in lstm
     n_hidden = 64 # number of featurs in TCN
     kernel_size  = 7
     dilation_rate = 4
@@ -199,12 +199,12 @@ if __name__ == "__main__":
     #    str(features)+"_lr"+str(lr)+"_sqerr", \
     #    histogram_freq=0, write_images=True)
 
-    filepath = "../data/mocks/logs/model_hybrid_denseoutput_dense_look"+str(lookback)+"_l"+str(layers)+\
+    filepath = "../data/mocks/logs/model_hybrid_denseoutput_same_dense_look"+str(lookback)+"_l"+str(layers)+\
         "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+\
             str(features)+"_lr"+str(lr)+"_sqerr.hdf5"
 
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
-        verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=10)
+        verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
 
 
@@ -212,6 +212,6 @@ if __name__ == "__main__":
     #        validation_data=test_data, callbacks=[callbacks])
 
 
-    K.set_value(model2.optimizer.lr, 2e-3)
+    K.set_value(model2.optimizer.lr, 3e-3)
     model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
             verbose=2, validation_data=test_data, callbacks=[callbacks])
