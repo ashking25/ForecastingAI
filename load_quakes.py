@@ -96,11 +96,11 @@ def set_eq_value(detector, day, lookback, Magnitude=4.8, EQEs=0, threshold_days 
 
 
 def dataloader(freq=5, lookback=3, batch_size=10, train_percent=0.8, test=False,
-    PATH='/Users/ashking/QuakeFinders/data/'):
+    file='list_of_data_lookback5.txt',PATH='/Users/ashking/QuakeFinders/data/'):
 
     """ Build generator to load the data progressively """
 
-    files = np.loadtxt(PATH+'list_of_data_lookback5.txt',dtype='str')
+    files = np.loadtxt(PATH+file,dtype='str')
     if test:
         files = files[int(train_percent*len(files)):]
     else:
@@ -161,10 +161,12 @@ if __name__ == "__main__":
 
     ### Data ###
     print 'train'
-    train_gen = dataloader(lookback=lookback, batch_size=batch_size, test=False)
+    train_gen = dataloader(lookback=lookback, batch_size=batch_size, train_percent=1.0, 
+                           test=False, file='list_of_data_lookback5.txt')
         #PATH='../data/mocks')
     print 'test'
-    test_gen  = dataloader(lookback=lookback, batch_size=10, test=True)#,
+    test_gen  = dataloader(lookback=lookback, batch_size=10, train_percent=1.0, 
+                           test=False, file='list_of_validate_data_lookback5.txt')#,
         #nstart=901, num_eq=1000, PATH='/home/ashking/quake_finder/data/mocks') #
     test_data = next(test_gen)
     train_data = next(train_gen)
