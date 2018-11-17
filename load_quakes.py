@@ -6,8 +6,17 @@ import sys
 import os
 from astropy.time import Time, TimeDelta
 import pandas as pd
-from hybrid import my_model
+from TCN_code import TCN as my_model
 from scipy.signal import decimate
+from keras import backend as K
+
+def median_value(y_true, y_pred):
+    #want the median value of the predicted output
+    return K.mean(y_pred)
+
+def std_value(y_true, y_pred):
+    #want the median value of the predicted output
+    return K.std(y_pred)
 
 def find_lookback(PATH,day,lookback):
     """ determine if all the days are present in the file"""
@@ -61,14 +70,15 @@ def load_data(PATH,detector,year,day,lookback,freq=1):
         for letter in ['d','e','n']:
             mag = np.load(PATH+'/'+year+'/'+letter+'_mag_volts_rs50/'+detector+'/'+previous_day+'.npy')
             derivative = np.append(mag[:-1]-mag[1:],0)
+            #derivative = derivative[:int(len(derivative)/5.)]
             # down sample
-            derivative = decimate(derivative, 10) # downsample by a factor of 10
+            #derivative = decimate(derivative, 10) # downsample by a factor of 10
             #derivative = decimate(derivative, 5) # twice if you want to downsample over a factor of 13
             derivative = np.transpose(derivative)
             reshaped = np.reshape(derivative,(freq,int(len(derivative)/freq)))
             values.append(reshaped)
         values = np.array(values)
-        values = np.reshape(values,(1,values.shape[1],values.shape[2],values.shape[0]))
+        values = np.reshape(values, (values.shape[2], values.shape[1], values.shape[0]))
         if len(all_values)==0:
             all_values = values
         else:
@@ -133,29 +143,31 @@ if __name__ == "__main__":
     batch_size = 2
     epochs = 200
     steps_per_epoch = 10# int(900/BATCH_SIZE)#*30
-    timesteps = 5
-    freq = 5
+    timesteps =1
+    freq = 50
     data_length = int(3600*24*freq/timesteps)
     lookback = 1
-    #input_dim = (None, int(data_length), 1)
-    input_dim = (int(lookback*timesteps), int(data_length), 3)
+    input_dim = (int(data_length), 1, 3)
+    #input_dim = (int(lookback*timesteps), int(data_length), 3)
     dropout = 0
-    features = 128 # number of features in lstm
-    n_hidden = 64 # number of featurs in TCN
-    kernel_size  = 15
-    dilation_rate = 2
-    layers = int(np.ceil(np.log((input_dim[1]-1.)/(2.*(kernel_size-1))+1)/np.log(dilation_rate)))
+    features = 1 # number of features in lstm
+    n_hidden = 8 # number of featurs in TCN
+    kernel_size  = (7, 1)
+    dilation_rate = 4
+    layers = int(np.ceil(np.log((input_dim[0]-1.)/(2.*(kernel_size[0]-1))+1)/np.log(dilation_rate)))
     #Optimizer
-    lr = 0.0003
+    lr = 0.03
     ### Model ###
 
-    model2 = my_model(input_dim, timesteps, lookback, layers, features, n_hidden,
+    model2 = my_model(input_dim, timesteps, layers, n_hidden,
             dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
+    #model2 = my_model(input_dim, timesteps, lookback, layers, features, n_hidden,
+    #        dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
 
 
     adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
         decay=0.01, amsgrad=False)
-    model2.compile(loss='mse', metrics=['accuracy'], optimizer=adam)
+    model2.compile(loss='mse', metrics=['accuracy', median_value, std_value], optimizer=adam)
 
     print(model2.summary())
     print('layers', layers)
@@ -173,9 +185,10 @@ if __name__ == "__main__":
     test_data = next(test_gen)
     train_data = next(train_gen)
     print('y test',test_data[1])
+    print('y train', train_data[1])
     print('shape',np.shape(test_data[0]))
     ### Fit ###
-    filepath = "../data/logs/model_hybrid_dense_look"+str(lookback)+"_l"+str(layers)+\
+    filepath = "../data/logs/model_tcn_dense_look"+str(lookback)+"_l"+str(layers)+\
         "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+\
             str(features)+"_lr"+str(lr)+"_sqerr.hdf5"
 
