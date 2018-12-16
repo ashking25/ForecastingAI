@@ -6,7 +6,17 @@ import sys
 import os
 from astropy.time import Time, TimeDelta
 import pandas as pd
-from hybrid import my_model
+from TCN_code import TCN as my_model
+from scipy.signal import decimate
+from keras import backend as K
+
+def median_value(y_true, y_pred):
+    #want the median value of the predicted output
+    return K.mean(y_pred)
+
+def std_value(y_true, y_pred):
+    #want the median value of the predicted output
+    return K.std(y_pred)
 
 def find_lookback(PATH,day,lookback):
     """ determine if all the days are present in the file"""
@@ -48,7 +58,7 @@ def make_data_list(PATH):
             line = fp.readline()
     f.close()
 
-def load_data(PATH,detector,year,day,lookback,freq=5):
+def load_data(PATH,detector,year,day,lookback,freq=1):
     times = Time(day[:4]+'-'+day[4:6]+'-'+day[6:8])
     t = Time(times)
     all_values =[]
@@ -60,11 +70,15 @@ def load_data(PATH,detector,year,day,lookback,freq=5):
         for letter in ['d','e','n']:
             mag = np.load(PATH+'/'+year+'/'+letter+'_mag_volts_rs50/'+detector+'/'+previous_day+'.npy')
             derivative = np.append(mag[:-1]-mag[1:],0)
+            #derivative = derivative[:int(len(derivative)/5.)]
+            # down sample
+            #derivative = decimate(derivative, 10) # downsample by a factor of 10
+            #derivative = decimate(derivative, 5) # twice if you want to downsample over a factor of 13
             derivative = np.transpose(derivative)
-            reshaped = np.reshape(derivative,(freq,len(derivative)/freq))
+            reshaped = np.reshape(derivative,(freq,int(len(derivative)/freq)))
             values.append(reshaped)
         values = np.array(values)
-        values = np.reshape(values,(1,values.shape[1],values.shape[2],values.shape[0]))
+        values = np.reshape(values, (values.shape[2], values.shape[1], values.shape[0]))
         if len(all_values)==0:
             all_values = values
         else:
@@ -99,87 +113,89 @@ def dataloader(freq=5, lookback=3, batch_size=10, train_percent=0.8, test=False,
     file='list_of_data_lookback5.txt',PATH='/home/ashking/quake_finder/data_qf/'):
 
     """ Build generator to load the data progressively """
+    while True:
+        files = np.loadtxt(PATH[:-8]+'ForecastingAI/'+file,dtype='str')
+        if test:
+            files = files[int(train_percent*len(files)):]
+        else:
+            files = files[:int(train_percent*len(files))]
+        random_files = np.random.choice(files,size=len(files),replace=False)
+        for i in range(int(len(random_files)/batch_size)):
+            data = []
+            y = []
+            for r in random_files[i*batch_size:(i+1)*batch_size]:
+                day = r[-12:-4]
+                times = Time(day[:4]+'-'+day[4:6]+'-'+day[6:8])
+                t = Time(times)
+                year = r[7:14]
+                detector = r[-17:-13]
+                if len(data) == 0:
+                    data = load_data(PATH+'level2',detector, year, day, lookback, freq=freq)
+                else:
+                    data = np.append(data,load_data(PATH+'level2', detector, year, day,\
+                    lookback, freq=freq), axis=0)
 
-    files = np.loadtxt(PATH+file,dtype='str')
-    if test:
-        files = files[int(train_percent*len(files)):]
-    else:
-        files = files[:int(train_percent*len(files))]
-    random_files = np.random.choice(files,size=len(files),replace=False)
-    for i in range(int(len(random_files)/batch_size)):
-        data = []
-        y = []
-        for r in random_files[i*batch_size:(i+1)*batch_size]:
-            day = r[-12:-4]
-            times = Time(day[:4]+'-'+day[4:6]+'-'+day[6:8])
-            t = Time(times)
-            year = r[10:17]
-            detector = r[-17:-13]
-            freq = 5
-            lookback = 5
-            if len(data) == 0:
-                data = load_data(PATH+'level2',detector, year, day, lookback, freq=freq)
-            else:
-                data = np.append(data,load_data(PATH+'level2', detector, year, day,\
-                lookback, freq=freq), axis=0)
-
-            y += [set_eq_value(detector, t, lookback, PATH=PATH)]
-        yield (data, np.array(y))
+                y += [set_eq_value(detector, t, lookback, PATH='')]
+            yield (data, np.array(y))
 
 
 if __name__ == "__main__":
     batch_size = 2
     epochs = 200
     steps_per_epoch = 10# int(900/BATCH_SIZE)#*30
-    timesteps = 5
+    timesteps =1
     freq = 50
     data_length = int(3600*24*freq/timesteps)
-    lookback = 5
-    #input_dim = (None, int(data_length), 1)
-    input_dim = (int(lookback*timesteps), int(data_length), 3)
+    lookback = 1
+    input_dim = (int(data_length), 1, 3)
+    #input_dim = (int(lookback*timesteps), int(data_length), 3)
     dropout = 0
     features = 1 # number of features in lstm
-    n_hidden = 64 # number of featurs in TCN
-    kernel_size  = 7
+    n_hidden = 8 # number of featurs in TCN
+    kernel_size  = (7, 1)
     dilation_rate = 4
-    layers = int(np.ceil(np.log((input_dim[1]-1.)/(2.*(kernel_size-1))+1)/np.log(dilation_rate)))
+    layers = int(np.ceil(np.log((input_dim[0]-1.)/(2.*(kernel_size[0]-1))+1)/np.log(dilation_rate)))
     #Optimizer
-    lr = 0.003
+    lr = 0.03
     ### Model ###
 
-    model2 = my_model(input_dim, timesteps, lookback, layers, features, n_hidden,
+    model2 = my_model(input_dim, timesteps, layers, n_hidden,
             dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
+    #model2 = my_model(input_dim, timesteps, lookback, layers, features, n_hidden,
+    #        dilation_rate=dilation_rate, kernel_size=kernel_size, dropout=dropout)
 
 
     adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
         decay=0.01, amsgrad=False)
-    model2.compile(loss='mse', metrics=['accuracy'], optimizer=adam)
+    model2.compile(loss='mse', metrics=['accuracy', median_value, std_value], optimizer=adam)
 
-    print (model2.summary())
+    print(model2.summary())
     print('layers', layers)
 
 
     ### Data ###
-    print 'train'
-    train_gen = dataloader(lookback=lookback, batch_size=batch_size, train_percent=1.0, 
+    print('train')
+    train_gen = dataloader(freq=timesteps, lookback=lookback, batch_size=batch_size, train_percent=1.0, 
                            test=False, file='list_of_data_lookback5.txt')
         #PATH='../data/mocks')
-    print 'test'
-    test_gen  = dataloader(lookback=lookback, batch_size=10, train_percent=1.0, 
+    print('test')
+    test_gen  = dataloader(freq=timesteps, lookback=lookback, batch_size=4, train_percent=1.0, 
                            test=False, file='list_of_validate_data_lookback5.txt')#,
         #nstart=901, num_eq=1000, PATH='/home/ashking/quake_finder/data/mocks') #
     test_data = next(test_gen)
     train_data = next(train_gen)
-
+    print('y test',test_data[1])
+    print('y train', train_data[1])
+    print('shape',np.shape(test_data[0]))
     ### Fit ###
-    filepath = "../data_qf/logs/model_hybrid_denseoutput_dense_look"+str(lookback)+"_l"+str(layers)+\
+    filepath = "../data/logs/model_tcn_dense_look"+str(lookback)+"_l"+str(layers)+\
         "_k"+str(kernel_size)+"_nh"+str(n_hidden)+"_d"+str(dilation_rate)+"_f"+\
             str(features)+"_lr"+str(lr)+"_sqerr.hdf5"
 
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
-        verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=10)
+        verbose=1, save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
 
 
-    model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=2, verbose=2, \
-            validation_data=test_data)#, callbacks=[callbacks])
+    model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs, verbose=2, \
+            validation_data=test_data, callbacks=[callbacks])
