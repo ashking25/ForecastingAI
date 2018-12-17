@@ -8,7 +8,7 @@ import pandas as pd
 from scipy.signal import decimate
 from keras import backend as K
 from keras.models import Sequential, Model
-from keras.layers import Dense, Input, Conv2D, UpSampling2D, Flatten, MaxPooling2D
+from keras.layers import BatchNormalization, Dense, Input, Conv2D, UpSampling2D, Flatten, MaxPooling2D
 from keras.callbacks import TensorBoard
 from keras.models import load_model
 from keras.callbacks import Callback
@@ -82,25 +82,41 @@ def auto_conv_encoder(input_dim, features, kernel, pool=2):
     # encoder
     conv1 = Conv2D(features, kernel, activation='relu', padding='same')(inputs)
     pool1 = MaxPooling2D((pool, 1), padding='same')(conv1)
-    conv2 = Conv2D(features*2, kernel, activation='relu', padding='same')(pool1)
+    bnorm1 = BatchNormalization()(pool1)
+
+    conv2 = Conv2D(features*2, kernel, activation='relu', padding='same')(bnorm1)
     pool2 = MaxPooling2D((pool, 1), padding='same')(conv2)
-    conv3 = Conv2D(features*4, kernel, activation='relu', padding='same')(pool2)
+    bnorm2 = BatchNormalization()(pool2)
+
+    conv3 = Conv2D(features*4, kernel, activation='relu', padding='same')(bnorm2)
     pool3 = MaxPooling2D((pool, 1), padding='same')(conv3)
+    bnorm3 = BatchNormalization()(pool3)
+
     conv4 = Conv2D(features*8, kernel, activation='relu', padding='same',
-                   activity_regularizer=regularizers.l1(1e-7))(pool3)
+                   activity_regularizer=regularizers.l1(1e-7))(bnorm3)
     pool4 = MaxPooling2D((pool,1), padding='same')(conv4)
-    #conv5 = Conv2D(1, kernel, activation='relu', padding='same',
-    #               activity_regularizer=regularizers.l1(1e-7))(pool4)
+    bnorm4 = BatchNormalization()(pool3)
+
+    conv5 = Conv2D(1, kernel, activation='relu', padding='same',
+                   activity_regularizer=regularizers.l1(1e-7))(bnorm4)
     # decoder
-    conv9 = Conv2D(features*8, kernel, activation='relu', padding='same')(pool4)
+    conv9 = Conv2D(features*8, kernel, activation='relu', padding='same')(conv5)
     pool9 = UpSampling2D((pool, 1))(conv9)
-    conv10 = Conv2D(features*4, kernel, activation='relu', padding='same')(pool9)
+    bnorm9 = BatchNormalization()(pool9)
+    
+    conv10 = Conv2D(features*4, kernel, activation='relu', padding='same')(bnorm9)
     pool10 = UpSampling2D((pool, 1))(conv10)
-    conv11 = Conv2D(features*2, kernel, activation='relu', padding='same')(pool10)
+    bnorm10 = BatchNormalization()(pool10)    
+
+    conv11 = Conv2D(features*2, kernel, activation='relu', padding='same')(bnorm10)
     pool11 = UpSampling2D((pool, 1))(conv11)
-    conv12 = Conv2D(features, kernel, activation='relu', padding='same')(pool11)
+    bnorm11 = BatchNormalization()(pool11)    
+
+    conv12 = Conv2D(features, kernel, activation='relu', padding='same')(bnorm11)
     pool12 = UpSampling2D((pool, 1))(conv12)
-    conv13 = Conv2D(3, kernel, activation='linear', padding='same')(pool12)
+    bnorm11 = BatchNormalization()(pool12)
+
+    conv13 = Conv2D(3, kernel, activation='linear', padding='same')(bnorm12)
 
     flat = Flatten()(conv13)
 
@@ -111,20 +127,20 @@ def auto_conv_encoder(input_dim, features, kernel, pool=2):
 if __name__ == "__main__":
     kernel = (7,1)
     features = 32 # hidden layer, i.e. num of features
-    lr = 1e-5
+    lr = 1e-3
     freq = 50
     input_dim = (24*3600*50./freq, 1, 3) # seconds in a day, number of channels -1
-    batch_size = 2
+    batch_size = 1
     fit_batch_size = batch_size*freq
     epochs = 1000
     lookback = 1
     steps_per_epoch = 100
 
-    train_gen = dataloader(freq=freq, lookback=lookback, batch_size=batch_size, train_percent=.05,
+    train_gen = dataloader(freq=freq, lookback=lookback, batch_size=batch_size, train_percent=.55,
                            test=False, file='list_of_data_lookback5.txt')
         #PATH='../data/mocks')
     print('test')
-    test_gen  = dataloader(freq=freq, lookback=lookback, batch_size=4, train_percent=0.95,
+    test_gen  = dataloader(freq=freq, lookback=lookback, batch_size=4, train_percent=0.55,
             test=False, file='list_of_validate_data_lookback5.txt')
     test_data = next(test_gen)
     train_data = next(train_gen)
@@ -134,7 +150,7 @@ if __name__ == "__main__":
     #model2 = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
 
     adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
-        decay=0.01)
+        decay=-1.01)
 
     model2.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)#, sample_weight_mode="temporal")
 
@@ -143,16 +159,21 @@ if __name__ == "__main__":
     #tensorboard = TensorBoard(log_dir="../data/mocks/logs/auto_conv_encoder_lr"+str(lr)+\
     #    "_f"+str(features)+"_k"+str(kernel[0])+"_sqerr", histogram_freq=0, write_images=False)
 
-    filepath = "../data/mocks/logs/auto_conv_encoder_regul_sample_weights_lr"+str(lr)+\
+    filepath = "../data/logs/auto_conv_encoder_regul_sample_weights_lr"+str(lr)+\
         "_f"+str(features)+"_k"+str(kernel[0])+"_sqerr.hdf5"
 
     callbacks = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
         save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
 
+    K.set_value(model2.optimizer.lr, 1e-4)
     model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=20,
-                verbose=1, validation_data=test_data, callbacks=[callbacks])
+                verbose=2, validation_data=test_data, callbacks=[callbacks])
+    
+#    K.set_value(model2.optimizer.lr, 1e-7)
+#    model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=20,
+#                verbose=2, validation_data=test_data, callbacks=[callbacks])
 
-    #K.set_value(model2.optimizer.lr, lr)
-    #model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
-    #        verbose=2, validation_data=test_data, callbacks=[callbacks])
+    K.set_value(model2.optimizer.lr, lr)
+    model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=epochs,
+            verbose=2, validation_data=test_data, callbacks=[callbacks])
