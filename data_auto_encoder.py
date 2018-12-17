@@ -69,6 +69,7 @@ def dataloader(freq=5, lookback=1, batch_size=10, train_percent=0.8, test=False,
                 else:
                     data = np.append(data,load_data(PATH+'level2', detector, year, day,\
                     lookback, freq=freq), axis=0)
+            data[np.where(np.isnan(data))] = 0
             y = np.reshape(data,(data.shape[0],data.shape[1]*data.shape[-1]))
             #y = data[:,:,0,0]
             for j in range(int(data.shape[0]/batch_size)):
@@ -92,10 +93,9 @@ def auto_conv_encoder(input_dim, features, kernel, pool=2):
     pool3 = MaxPooling2D((pool, 1), padding='same')(conv3)
     bnorm3 = BatchNormalization()(pool3)
 
-    conv4 = Conv2D(features*8, kernel, activation='relu', padding='same',
-                   activity_regularizer=regularizers.l1(1e-7))(bnorm3)
+    conv4 = Conv2D(features*8, kernel, activation='relu', padding='same')(bnorm3)
     pool4 = MaxPooling2D((pool,1), padding='same')(conv4)
-    bnorm4 = BatchNormalization()(pool3)
+    bnorm4 = BatchNormalization()(pool4)
 
     conv5 = Conv2D(1, kernel, activation='relu', padding='same',
                    activity_regularizer=regularizers.l1(1e-7))(bnorm4)
@@ -114,7 +114,7 @@ def auto_conv_encoder(input_dim, features, kernel, pool=2):
 
     conv12 = Conv2D(features, kernel, activation='relu', padding='same')(bnorm11)
     pool12 = UpSampling2D((pool, 1))(conv12)
-    bnorm11 = BatchNormalization()(pool12)
+    bnorm12 = BatchNormalization()(pool12)
 
     conv13 = Conv2D(3, kernel, activation='linear', padding='same')(bnorm12)
 
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     #model2 = load_model('../data/mocks/logs/auto_conv_encoder_lr3e-05_f16_k7_sqerr.hdf5')
 
     adam = keras.optimizers.Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None,
-        decay=-1.01)
+        decay=.01)
 
     model2.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer=adam)#, sample_weight_mode="temporal")
 
@@ -166,7 +166,7 @@ if __name__ == "__main__":
         save_best_only=True, save_weights_only=False, mode='auto', period=10)
 
 
-    K.set_value(model2.optimizer.lr, 1e-4)
+    K.set_value(model2.optimizer.lr, 1e-5)
     model2.fit_generator(train_gen, steps_per_epoch=steps_per_epoch, epochs=20,
                 verbose=2, validation_data=test_data, callbacks=[callbacks])
     
